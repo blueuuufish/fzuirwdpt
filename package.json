@@ -7,14 +7,26 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "@pixi/filter-bevel": "^5.1.1",
+    "@pixi/filter-drop-shadow": "^5.2.0",
+    "@pixi/filter-outline": "^5.2.0",
+    "@stomp/stompjs": "^7.0.0",
     "core-js": "^3.8.3",
     "element-plus": "^2.7.6",
+    "jwt-decode": "^4.0.0",
+    "pixi-viewport": "^5.0.3",
+    "pixi.js": "^8.2.1",
+    "rxjs": "^6.6.7",
+    "sockjs-client": "^1.6.1",
     "vue": "^3.2.13",
     "vue-class-component": "^8.0.0-0",
     "vue-router": "^4.0.3",
+    "vue-rx": "^6.2.0",
+    "vue3-pixi": "^0.9.3",
     "vuex": "^4.0.0"
   },
   "devDependencies": {
+    "@types/sockjs-client": "^1.5.4",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-plugin-typescript": "~5.0.0",
