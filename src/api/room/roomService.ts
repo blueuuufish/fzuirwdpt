@@ -1,38 +1,51 @@
-import { ref, onUnmounted, inject } from 'vue';
-import { useThrottle } from '@vueuse/core';
+import { ref, onUnmounted, defineEmits} from 'vue';
 // TODO: 是否需要httpclient？
 // import { useHttpClient } from './httpClient'; // 需要实现 HTTP 客户端的 composable
 // TODO: rxjs
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import {Room} from '@/shared/models/roomModel'
 import { useRouter } from 'vue-router';
 import { useSocketGameService } from '@/api/ws/socketGameService'; // 需要实现 SocketGameService 的 composable
+import { IMessage, StompSubscription } from '@stomp/stompjs';
+import { throttle } from 'lodash-es';
+import { PuzzlePiece } from '@/shared/models/puzzlePieceModel';
+import { SocketDestinations } from '@/shared/enums/socketDestinationsEnum';
+import { SocketEventType } from '@/shared/enums/socketEventTypeEnum';
+import { RoomUser } from '@/shared/models/roomUserModel';
+import { SocketMessage } from '@/shared/models/ws/socketMessageModel';
+import { RoomUserJoinedDto } from '@/shared/models/dto/roomUserJoinedDto';
+import { RoomUserLeftDto } from '@/shared/models/dto/roomUserLeftDto';
 
 // TODO: 检查逻辑是否一致
 
 export function useRoomService() {
-  const roomEvent = ref([]);
+  const emit = defineEmits(['roomEvent']);
   // const roomSubject = ref({});
   const roomSubject: BehaviorSubject<Room>  = new BehaviorSubject({} as any);
-  const stompSubscription = ref(null);
+  const stompSubscription = ref<StompSubscription | null>(null);
 
   // const httpClient = useHttpClient();
   const router = useRouter();
   const socketGameService = useSocketGameService();
+  const sendMoveMessage = (puzzlePiece:PuzzlePiece) => {
+    socketGameService.publish(
+      SocketDestinations.Room+ "/" + roomSubject.value.id + "/puzzle/move",
+      { puzzlePiece }
+    );
+  };
 
-  const sendMoveMessageThrottle = useThrottle((puzzlePiece) => {
-    sendMoveMessage(puzzlePiece);
-  }, 50);
+  const sendMoveMessageThrottle = throttle(sendMoveMessage, 50, {});
 
-  const join = (id, initialDataCallback = null) => {
+
+  const join = (id:string, initialDataCallback: Function | null = null) => {
     stompSubscription.value = socketGameService.subscribe(
-      `SocketDestinations.Room/${id}`,
-      (message) => {
+      SocketDestinations.Room + "/" + id,
+      (message:IMessage) => {
         const socketMessage = JSON.parse(message.body);
-        if (socketMessage.event === 'Room_InitialData') {
+        if (socketMessage.event === SocketEventType.Room_InitialData) {
           const socketMessageBody = socketMessage.body;
           socketMessageBody.room.users = socketMessageBody.room.users.map(
-            (user) => ({ ...user })
+            (user:RoomUser) => new RoomUser(user.username,user.colorId)
           );
 
           setRoomSubject(socketMessageBody.room);
@@ -46,22 +59,22 @@ export function useRoomService() {
     );
   };
 
-  const setRoomSubject = (room) => {
-    roomSubject.value = room;
+  const setRoomSubject = (room:Room) => {
+    roomSubject.next(room);
   };
 
   const detach = () => {
-    socketGameService.unsubscribe(`SocketDestinations.Room/${roomSubject.value.id}`);
+    socketGameService.unsubscribe(SocketDestinations.Room + "/" + roomSubject.value.id);
     stompSubscription.value?.unsubscribe();
     stompSubscription.value = null;
   };
 
-  const receiveMessage = (message) => {
-    if (message.event === 'Room_UserJoined') {
-      const messageBody = message.body;
-      const roomUser = { ...messageBody.user };
+  const receiveMessage = (message:SocketMessage) => {
+    if (message.event === SocketEventType.Room_UserJoined) {
+      const messageBody: RoomUserJoinedDto= message.body;
+      const roomUser:RoomUser = new RoomUser(messageBody.user.username,messageBody.user.colorId);
 
-      if (roomUser.username === socketGameService.socketGameData.value?.username) {
+      if (roomUser.username === socketGameService.socketGameDataSubject.value?.username) {
         return;
       }
 
@@ -69,8 +82,8 @@ export function useRoomService() {
         ...roomSubject.value,
         users: [...roomSubject.value.users, roomUser],
       });
-    } else if (message.event === 'Room_UserLeft') {
-      const messageBody = message.body;
+    } else if (message.event === SocketEventType.Room_UserLeft) {
+      const messageBody: RoomUserLeftDto = message.body;
       setRoomSubject({
         ...roomSubject.value,
         users: roomSubject.value.users.filter(
@@ -79,35 +92,30 @@ export function useRoomService() {
       });
     }
 
-    roomEvent.value.push(message);
+    emit('roomEvent',message)
   };
 
   const isJoined = () => {
     return stompSubscription.value != null;
   };
 
-  const sendMovePuzzlePiece = (puzzlePiece) => {
+  const sendMovePuzzlePiece = (puzzlePiece:PuzzlePiece) => {
     sendMoveMessageThrottle(puzzlePiece);
   };
 
-  const sendMoveMessage = (puzzlePiece) => {
+
+
+  const sendReleasePuzzlePiece = (puzzlePiece:PuzzlePiece) => {
     socketGameService.publish(
-      `SocketDestinations.Room/${roomSubject.value.id}/puzzle/move`,
+      SocketDestinations.Room + "/" +roomSubject.value.id + "/puzzle/release",
       { puzzlePiece }
     );
   };
 
-  const sendReleasePuzzlePiece = (puzzlePiece) => {
-    socketGameService.publish(
-      `SocketDestinations.Room/${roomSubject.value.id}/puzzle/release`,
-      { puzzlePiece }
-    );
-  };
-
-  const getUserByUsername = (username) => {
+  const getUserByUsername = (username:string): RoomUser | undefined => {
     if (!roomSubject.value.id) throw new Error("Room doesn't exist.");
 
-    const room = roomSubject.value;
+    const room:Room = roomSubject.value;
     return room.users.find((user) => user.username === username);
   };
 
@@ -116,7 +124,6 @@ export function useRoomService() {
   });
 
   return {
-    roomEvent,
     roomSubject,
     join,
     detach,

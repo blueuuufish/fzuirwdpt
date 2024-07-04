@@ -31,13 +31,26 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElForm, ElFormItem, ElInput, ElButton, ElAlert } from 'element-plus';
+import { useSocketGameService } from '@/api/ws/socketGameService';
 
 const form = ref({
   playerName: ''
 });
+  
+  onMounted(()=>{
+    // const client = new useSocketGameService();
+      const client = useSocketGameService();
+      client.connect("hijimi")
+      client.subscribe('/lobby',(message)=>{
+        console.log(message)
+        const socketMessage = JSON.parse(message.body);
+        console.log("----"+socketMessage)
+      })
+  })
+
 
 const rules = {
   playerName: [
@@ -62,6 +75,7 @@ const onSubmit = () => {
     });
   }
 };
+
 </script>
 
 <style scoped>

@@ -1,4 +1,7 @@
 <template>
+  <div></div>
+</template>
+<!-- <template>
     <PixiBoard ref="pixiBoard" />
 </template>
 
@@ -106,4 +109,4 @@ export default defineComponent({
   margin: 0;
   padding: 0;
 }
-</style>
+</style> -->

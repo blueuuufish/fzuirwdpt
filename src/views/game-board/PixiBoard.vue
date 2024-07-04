@@ -1,12 +1,12 @@
-<template>
+<!-- <template>
   <div class="align-center" ref="pixiContainer" id="pixiContainer"></div>
 </template>
 
 <script lang="ts">
 import { ref, onMounted, onBeforeUnmount,defineComponent } from 'vue';
-import { Application, Assets, Container, Sprite, Texture } from 'pixi.js';
+import { Application, Assets, Container, setPositions, Sprite, Texture } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
-import {PuzzlePieceSprite} from './PuzzlePieceSprite.vue';
+import PuzzlePieceSprite from './PuzzlePieceSprite.vue';
 import { PuzzlePiece } from '@/shared/models/puzzlePieceModel'
 import { Puzzle } from '@/shared/models/puzzleModel'
 import { RoomUser } from '@/shared/models/roomUserModel'
@@ -16,18 +16,20 @@ import { RoomUser } from '@/shared/models/roomUserModel'
 // TODO: 检查逻辑是否一致
 export default defineComponent({
   name: 'PixiBoard',
+  props: {},
   setup() {
     const pixiContainer = ref<HTMLDivElement | null>(null);
     const pixiApp = ref<Application | null>(null);
     const pixiViewport = ref<Viewport | null>(null);
     const pieceContainer = ref(new Container());
-    const puzzlePieces = ref<PuzzlePieceSprite[][]>([]);
-    const pieceMap = ref(new Map<number, PuzzlePieceSprite[]>());
+    //TODO: const pieceMap = ref(new Map<number, typeof PuzzlePieceSprite[]>());PuzzlePieceSprite' refers to a value, but is being used as a type here. Did you mean 'typeof PuzzlePieceSprite'?Vetur(2749)
+    const puzzlePieces = ref<typeof PuzzlePieceSprite[][]>([]);
+    const pieceMap = ref(new Map<number, typeof PuzzlePieceSprite[]>());
     const worldWidth = 2000;
     const worldHeight = 1500;
     const puzzleTexture = ref<Texture | null>(null);
     const puzzle = ref<Puzzle | null>(null);
-    const activePuzzlePiece = ref<PuzzlePieceSprite | null>(null);
+    const activePuzzlePiece = ref<typeof PuzzlePieceSprite | null>(null);
 
     onMounted(() => {
       if (pixiContainer.value) {
@@ -37,13 +39,12 @@ export default defineComponent({
           resolution: 1,
           resizeTo: pixiContainer.value,
         });
-
         pixiViewport.value = new Viewport({
           screenWidth: window.innerWidth,
           screenHeight: window.innerHeight,
-          worldWidth,
-          worldHeight,
-          events: pixiApp.value.renderer.events,
+          worldWidth: worldWidth,
+          worldHeight: worldHeight,
+          events: pixiApp.value.renderer.events
         });
 
         pixiApp.value.stage.addChild(pixiViewport.value);
@@ -54,7 +55,7 @@ export default defineComponent({
           .decelerate();
 
         pieceContainer.value.sortableChildren = true;
-        pieceContainer.value.interactive = true;
+        pieceContainer.value.eventMode = 'static'
         pieceContainer.value.on('pointermove', (e: any) => onDragMove(e));
 
         pixiContainer.value.appendChild(pixiApp.value.view);
@@ -169,4 +170,4 @@ export default defineComponent({
   width: 100%;
   height: 100%;
 }
-</style>
+</style> -->
