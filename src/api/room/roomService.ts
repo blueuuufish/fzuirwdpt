@@ -1,7 +1,5 @@
 import { ref, onUnmounted, defineEmits} from 'vue';
-// TODO: 是否需要httpclient？
 // import { useHttpClient } from './httpClient'; // 需要实现 HTTP 客户端的 composable
-// TODO: rxjs
 import { BehaviorSubject, Observable } from 'rxjs';
 import {Room} from '@/shared/models/roomModel'
 import { useRouter } from 'vue-router';
@@ -16,7 +14,6 @@ import { SocketMessage } from '@/shared/models/ws/socketMessageModel';
 import { RoomUserJoinedDto } from '@/shared/models/dto/roomUserJoinedDto';
 import { RoomUserLeftDto } from '@/shared/models/dto/roomUserLeftDto';
 
-// TODO: 检查逻辑是否一致
 
 export function useRoomService() {
   const emit = defineEmits(['roomEvent']);
