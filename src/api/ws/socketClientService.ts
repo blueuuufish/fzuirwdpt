@@ -2,7 +2,6 @@ import SockJS from 'sockjs-client';
 import { Stomp, CompatClient, StompSubscription, messageCallbackType} from '@stomp/stompjs';
 import { environment } from '@/environments/environment';
 
-// TODO: 检查逻辑是否一致
 export function useSocketClient() {
   let stompClient:CompatClient;
 

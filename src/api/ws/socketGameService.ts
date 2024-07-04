@@ -5,7 +5,6 @@ import { BehaviorSubject } from 'rxjs';
 import { StompSubscription, messageCallbackType } from '@stomp/stompjs';
 import { SocketGameData } from '@/shared/models/ws/SocketGameDataModel';
 
-// TODO: 检查逻辑是否一致
 export function useSocketGameService() {
   const socketGameDataSubject:BehaviorSubject<SocketGameData | null> = new BehaviorSubject<SocketGameData | null>(null)
 
