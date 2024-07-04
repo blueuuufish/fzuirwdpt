@@ -66,9 +66,13 @@ export function useLobbyService() {
     formData.append('file', imageFile);
     const jsonBlob = new Blob([JSON.stringify(lobbyCreateRoom)], { type: 'application/json' });
         formData.append('dto', jsonBlob, 'dto.json');
+    console.log("===");
+    console.log(formData. get("file"));
+    
+    
     request.post({
       url: `${environment.apiUrl}/rooms`,
-      data: formData
+      data: formData2
     }).then((data)=> {
       console.log(data)
       // roomService.join(room.id); 
