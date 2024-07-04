@@ -30,7 +30,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup >
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElForm, ElFormItem, ElInput, ElButton, ElAlert } from 'element-plus';
@@ -39,16 +39,57 @@ import { useSocketGameService } from '@/api/ws/socketGameService';
 const form = ref({
   playerName: ''
 });
+// const sleep = (ms) => {
+//   return new Promise(resolve => setTimeout(resolve, ms));
+// };
+// const client = useSocketGameService();
+// client.connect("hijimi")
+// const connectAndSubscribe = async () => {
+//   await sleep(10000);
+//   client.subscribe('/lobby', (message) => {
+//       console.log(message);
+//       const socketMessage = JSON.parse(message.body);
+//       console.log("111" + socketMessage.message);
+//     });
+// }
+// const connectClient = (headers) => {
+//   return new Promise((resolve, reject) => {
+//     client.connect(headers, (error) => {
+//       if (error) {
+//         reject(error);
+//       } else {
+//         resolve();
+//       }
+//     });
+//   });
+// };
+// const connectAndSubscribe = async () => {
+//   try {
+//     await connectClient("hijimi");
+//     client.subscribe('/lobby', (message) => {
+//       console.log(message);
+//       const socketMessage = JSON.parse(message.body);
+//       console.log("111" + socketMessage.message);
+//     });
+//   } catch (error) {
+//     console.error('Failed to connect:', error);
+//   }
+// };
+
+
   
   onMounted(()=>{
+    // connectAndSubscribe()
     // const client = new useSocketGameService();
-      const client = useSocketGameService();
-      client.connect("hijimi")
-      client.subscribe('/lobby',(message)=>{
-        console.log(message)
-        const socketMessage = JSON.parse(message.body);
-        console.log("----"+socketMessage)
-      })
+      // const client = useSocketGameService();
+      // client.connect("hijimi")
+      // sleep(20000)
+      // client.subscribe('/lobby',(message)=>{
+      //   console.log(message)
+      //   const socketMessage = JSON.parse(message.body);
+      //   console.log("111"+socketMessage)
+      // })
+      
   })
 
 

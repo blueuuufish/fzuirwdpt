@@ -119,9 +119,9 @@ export function useRoomService() {
     return room.users.find((user) => user.username === username);
   };
 
-  onUnmounted(() => {
-    detach();
-  });
+  // onUnmounted(() => {
+  //   detach();
+  // });
 
   return {
     roomSubject,

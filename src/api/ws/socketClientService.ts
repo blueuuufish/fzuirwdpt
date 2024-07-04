@@ -1,13 +1,13 @@
 import SockJS from 'sockjs-client';
 import { Stomp, CompatClient, StompSubscription, messageCallbackType} from '@stomp/stompjs';
+import { environment } from '@/environments/environment';
 
 // TODO: 检查逻辑是否一致
 export function useSocketClient() {
   let stompClient:CompatClient;
 
   const initializeWebSocketConnection = (connectHeaders:any, connectCallback: Function) => {
-    const ws = new SockJS('http://172.18.103.55:10087/ws'); // 替换为你的实际 WebSocket 端点
-    console.log('----')
+    const ws = new SockJS(environment.wsApiUrl); // 替换为你的实际 WebSocket 端点
     stompClient = Stomp.over(()=> ws);
     stompClient.onConnect = (frame:any)=>{
         onConnect;
