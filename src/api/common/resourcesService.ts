@@ -1,13 +1,17 @@
-import { Observable,from} from 'rxjs';
-import request from '@/utils/request';
+import { from, Observable } from 'rxjs';
+
 export function useResourcesService() {
-  const getImageAsFile = (imageUrl: string): Observable<File> => {
-    return from(
-      request.get({url:imageUrl,responseType: 'blob'})
-        .then(response => new File([response.data], imageUrl, { type: "image/jpeg" }))
-    );
-  }
-  return{
-    getImageAsFile
+  const getImageAsFile = async (imageUrl: string): Promise<File> => {
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const blob = await response.blob();
+    return new File([blob], imageUrl.split('/').pop() || 'default.jpg', { type: 'image/jpeg' });
+  };
+
+  return {
+    getImageAsFile,
   };
 }
+

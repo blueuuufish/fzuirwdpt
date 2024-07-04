@@ -39,6 +39,8 @@ export function useSocketClient() {
   };
 
   const subscribe = (destination:string, callback: messageCallbackType): StompSubscription => {
+      console.log("destination"+destination)
+      console.log(stompClient.state)
       return stompClient.subscribe(destination, callback);
   };
 

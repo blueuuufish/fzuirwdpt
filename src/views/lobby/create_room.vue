@@ -73,6 +73,8 @@ import { ref, onMounted } from "vue";
 import { useLobbyService } from "@/api/lobby/lobbyService";
 import { LobbyCreateRoomDto } from "@/shared/models/dto/lobbyCreateRoomDto";
 import convertImageToBase64 from "@/utils/convertImageToBase64";
+import { useSocketGameService } from '@/api/ws/socketGameService';
+import { provide } from 'vue';
 const form = ref({
   pieces: 20,
   userCapacity: 3,
@@ -92,6 +94,32 @@ const imagePaths = [
   require("@/assets/default_images/default006.jpg"),
 ];
 
+const client = useSocketGameService();
+const connectClient = (headers) => {
+  return new Promise((resolve, reject) => {
+    client.connect(headers, (error) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+const connectAndSubscribe = async () => {
+  try {
+    await connectClient("hijimi");
+    client.subscribe('/lobby', (message) => {
+      console.log(message);
+      const socketMessage = JSON.parse(message.body);
+      console.log("111" + socketMessage.message);
+    });
+  } catch (error) {
+    console.error('Failed to connect:', error);
+  }
+}
+  
+
 onMounted(async () => {
   for (const path of imagePaths) {
     const response = await fetch(path);
@@ -102,6 +130,8 @@ onMounted(async () => {
     imageFiles.value.push(file);
     defaultImages.value.push(URL.createObjectURL(file));
   }
+  connectAndSubscribe()
+  provide('socketClient',client)
 });
 
 const selectImage = (image) => {
@@ -157,23 +187,22 @@ const onSubmit = () => {
   //   userCapacity: form.value.userCapacity,
   // });
 
-  console.log(imageFiles.value[0])
   convertImageToBase64(
-      imageFiles.value[0],
-      (result) => {
-        console.log(result);
-        rs = result;
-        lobbyService.createRoom(
-            {
-              pieces: form.value.pieces,
-              userCapacity: form.value.userCapacity,
-            },
-            imageFiles.value[0]
-        );
-      },
-      (error) => {
-        this.conversionError = error;
-      }
+    imageFiles.value[0],
+    (result) => {
+      console.log(result);
+      rs = result;
+      lobbyService.createRoom(
+        {
+          pieces: form.value.pieces,
+          userCapacity: form.value.userCapacity,
+        },
+        result
+      );
+    },
+    (error) => {
+      this.conversionError = error;
+    }
   );
 };
 </script>

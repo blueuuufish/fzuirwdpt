@@ -1,6 +1,7 @@
 import { service } from './service'
 
 import { config } from './config'
+import { da } from 'element-plus/es/locale'
 
 const { default_headers } = config
 

@@ -35,6 +35,7 @@ export function useRoomService() {
 
 
   const join = (id:string, initialDataCallback: Function | null = null) => {
+    console.log(id)
     stompSubscription.value = socketGameService.subscribe(
       SocketDestinations.Room + "/" + id,
       (message:IMessage) => {

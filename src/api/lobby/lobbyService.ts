@@ -2,7 +2,7 @@ import { useSocketGameService } from "../ws/socketGameService";
 import { SocketDestinations } from "@/shared/enums/socketDestinationsEnum";
 import { SocketEventType } from "@/shared/enums/socketEventTypeEnum";
 import { SocketMessage } from "@/shared/models/ws/socketMessageModel";
-import { IMessage, StompSubscription } from '@stomp/stompjs';
+import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import { LobbyCreateRoomDto } from "@/shared/models/dto/lobbyCreateRoomDto";
 import { BehaviorSubject, Observable, from} from 'rxjs';
 import { Room } from "@/shared/models/roomModel";
@@ -12,15 +12,18 @@ import { ref, onUnmounted, defineEmits} from 'vue';
 import request from "@/utils/request";
 import { environment } from "@/environments/environment";
 import { AxiosResponse } from "axios";
+import { inject } from "vue";
+
 
 export function useLobbyService() {
   const emit = defineEmits(['lobbyEvent']);
   const roomListSubject: BehaviorSubject<Room[]>  = new BehaviorSubject([] as any);
   const creatingRoomSubject:BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  // const socketGameService = useSocketGameService();
   const socketGameService = useSocketGameService();
   const roomService = useRoomService();
   const stompSubscriptions = ref<StompSubscription[]>([]);
-
+  const asd = inject<typeof useSocketGameService>('socketClient');
   const join = (initialDataCallback: Function) => {
       stompSubscriptions.value.push(
         socketGameService.subscribe(SocketDestinations.Lobby,(message:IMessage)=>{
@@ -61,6 +64,7 @@ export function useLobbyService() {
   }
   // TODO: 未测试 未调用roomService
   const createRoom = (lobbyCreateRoom: LobbyCreateRoomDto, imageFile: File) => {
+    console.log('------')
     console.log(imageFile);
     const formData: FormData = new FormData();
     formData.append('file', imageFile);
@@ -69,20 +73,16 @@ export function useLobbyService() {
         formData.append('dto', jsonBlob, 'dto.json');
     console.log("===");
     console.log(formData. get("file"));
-
-
+    
+    
     request.post({
-        url: `${environment.apiUrl}/rooms`,
-        data: formData,
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-    }).then((data) => {
-        console.log(data);
-        // roomService.join(room.id);
-    }).catch((error) => {
-        console.error('提交表单时出错:', error);
-    });
+      url: `${environment.apiUrl}/rooms`,
+      data: formData2
+    }).then((data)=> {
+      console.log(data)
+      // roomService.join(room.id); 
+    })
+   
   }
   
   const changeCreatingRoom = (creatingRoom: boolean) => {
