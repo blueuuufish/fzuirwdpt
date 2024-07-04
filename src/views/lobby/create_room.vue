@@ -78,11 +78,11 @@ const onSubmit = () => {
       if (valid) {
         // 处理表单提交
         const lobbyService = useLobbyService();
-        const dto = new LobbyCreateRoomDto(
-            { pieces: form.value.pieces,
-              userCapacity: form.value.userCapacity
-            })
-        lobbyService.createRoom(dto,form.value.puzzleImage)
+        // const dto = new LobbyCreateRoomDto(
+        //     { pieces: form.value.pieces,
+        //       userCapacity: form.value.userCapacity
+        //     })
+        // lobbyService.createRoom(dto,form.value.puzzleImage)
         console.log(form.value)
         ElMessage.success('表单已提交!');
       } else {
@@ -93,15 +93,6 @@ const onSubmit = () => {
 };
 
 const selectImage = (image) => {
-  // if(this.puzzleImageFile != null) {
-  //   convertImageToBase64(image, (result: string) => {
-  //     this.puzzleImage.setValue(result);
-  //
-  //     this.conversionError = null;
-  //   }, (error: string) => {
-  //     this.conversionError = error;
-  //   });
-  // }
   form.value.puzzleImage = image;
 };
 
