@@ -4,11 +4,14 @@ import { SocketEventType } from "@/shared/enums/socketEventTypeEnum";
 import { SocketMessage } from "@/shared/models/ws/socketMessageModel";
 import { IMessage, StompSubscription } from '@stomp/stompjs';
 import { LobbyCreateRoomDto } from "@/shared/models/dto/lobbyCreateRoomDto";
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, from} from 'rxjs';
 import { Room } from "@/shared/models/roomModel";
 import { LobbyRoomCreatedDto } from "@/shared/models/dto/lobbyRoomCreateDto";
 import { useRoomService } from "../room/roomService";
 import { ref, onUnmounted, defineEmits} from 'vue';
+import request from "@/utils/request";
+import { environment } from "@/environments/environment";
+import { AxiosResponse } from "axios";
 
 // TODO: 检查逻辑是否一致
 
@@ -41,12 +44,15 @@ export function useLobbyService() {
       roomListSubject.next(roomList);
   };
 
-  // const getRooms: Observable<Room[]> = () =>{
-  //     return this.http
-  //       .get<Room[]>(
-  //       `${environment.apiUrl}/rooms`
-  //     );
+  // const getRooms = (): Observable<Room[]> => {
+  //   return from(
+  //     request.get<Room[]>({url:`${environment.apiUrl}/rooms`})
+  //     .then((response: AxiosResponse<Room[]>) => response.data)
+  //   );
   // }
+  const getRooms = () => {
+    return request.get<Room[]>({url:`${environment.apiUrl}/rooms`});
+  }
   const detach = () => {
     socketGameService.unsubscribe(SocketDestinations.Lobby);
     socketGameService.unsubscribeUser(SocketDestinations.Lobby);
@@ -55,8 +61,20 @@ export function useLobbyService() {
     }
     stompSubscriptions.value = [];
   }
-  const createRoom = () => {
-
+  const createRoom = (lobbyCreateRoom: LobbyCreateRoomDto, imageFile: File) => {
+    console.log(imageFile);
+    const formData: FormData = new FormData();
+    formData.append('file', imageFile);
+    const jsonBlob = new Blob([JSON.stringify(lobbyCreateRoom)], { type: 'application/json' });
+        formData.append('dto', jsonBlob, 'dto.json');
+    request.post({
+      url: `${environment.apiUrl}/rooms`,
+      data: formData
+    }).then((room:Room)=> {
+      console.log(room)
+      roomService.join(room.id); 
+    })
+   
   }
   
   const changeCreatingRoom = (creatingRoom: boolean) => {
@@ -75,6 +93,13 @@ export function useLobbyService() {
   }
 
   return {
-   
+      creatingRoomSubject,
+      roomListSubject,
+      join,
+      getRooms,
+      setRoomListSubject,
+      detach,
+      createRoom,
+      changeCreatingRoom
   };
 }

@@ -35,10 +35,12 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElForm, ElFormItem, ElInput, ElButton, ElAlert } from 'element-plus';
 import { useSocketGameService } from '@/api/ws/socketGameService';
+import {useLobbyService} from '@/api/lobby/lobbyService'
 
 const form = ref({
   playerName: ''
 });
+const lobbyService = useLobbyService()
 // const sleep = (ms) => {
 //   return new Promise(resolve => setTimeout(resolve, ms));
 // };
