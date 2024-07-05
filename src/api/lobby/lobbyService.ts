@@ -74,13 +74,12 @@ export function useLobbyService() {
     console.log("===");
     console.log(formData. get("file"));
     
-    
     request.post({
       url: `${environment.apiUrl}/rooms`,
-      data: formData2
-    }).then((data)=> {
-      console.log(data)
-      // roomService.join(room.id); 
+      data: formData
+    }).then((room:Room)=> {
+      // console.log(data)
+      roomService.join(room.id); 
     })
    
   }
