@@ -61,9 +61,9 @@ export function useSocketGameService() {
     socketGameDataSubject.next(socketGameData)
   };
 
-  onUnmounted(() => {
-    disconnect();
-  });
+  // onUnmounted(() => {
+  //   disconnect();
+  // });
 
   return {
     socketGameDataSubject,

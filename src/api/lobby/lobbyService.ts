@@ -64,20 +64,25 @@ export function useLobbyService() {
     console.log(imageFile);
     const formData: FormData = new FormData();
     formData.append('file', imageFile);
+    console.log(formData);
     const jsonBlob = new Blob([JSON.stringify(lobbyCreateRoom)], { type: 'application/json' });
         formData.append('dto', jsonBlob, 'dto.json');
     console.log("===");
     console.log(formData. get("file"));
-    
-    
+
+
     request.post({
-      url: `${environment.apiUrl}/rooms`,
-      data: formData2
-    }).then((data)=> {
-      console.log(data)
-      // roomService.join(room.id); 
-    })
-   
+        url: `${environment.apiUrl}/rooms`,
+        data: formData,
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    }).then((data) => {
+        console.log(data);
+        // roomService.join(room.id);
+    }).catch((error) => {
+        console.error('提交表单时出错:', error);
+    });
   }
   
   const changeCreatingRoom = (creatingRoom: boolean) => {

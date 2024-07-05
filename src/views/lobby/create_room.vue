@@ -7,60 +7,60 @@
         </div>
       </template>
       <el-form
-        :model="form"
-        :rules="rules"
-        ref="formRef"
-        label-width="100px"
-        class="form"
+          :model="form"
+          :rules="rules"
+          ref="formRef"
+          label-width="100px"
+          class="form"
       >
         <el-form-item label="拼图块数" prop="pieces" class="form-item">
           <el-input-number
-            v-model="form.pieces"
-            :min="20"
-            :max="1000"
-            controls-position="right"
-            class="input"
+              v-model="form.pieces"
+              :min="20"
+              :max="1000"
+              controls-position="right"
+              class="input"
           ></el-input-number>
         </el-form-item>
         <el-form-item label="用户容量" prop="userCapacity" class="form-item">
           <el-input-number
-            v-model="form.userCapacity"
-            :min="1"
-            :max="5"
-            controls-position="right"
-            class="input"
+              v-model="form.userCapacity"
+              :min="1"
+              :max="5"
+              controls-position="right"
+              class="input"
           ></el-input-number>
         </el-form-item>
         <div class="image-panel form-item">
           <el-form-item label="拼图图片" class="image-form-item">
             <el-row :gutter="10">
               <el-col
-                :span="8"
-                v-for="(image, index) in defaultImages"
-                :key="index"
+                  :span="8"
+                  v-for="(image, index) in defaultImages"
+                  :key="index"
               >
                 <img
-                  :src="image"
-                  class="default-image"
-                  :class="{ selected: image === form.puzzleImage }"
-                  @click="selectImage(image)"
+                    :src="image"
+                    class="default-image"
+                    :class="{ selected: image === form.puzzleImage }"
+                    @click="selectImage(image)"
                 />
               </el-col>
             </el-row>
           </el-form-item>
           <el-button type="primary" @click="uploadImage" class="upload-btn"
-            >上传图片</el-button
+          >上传图片</el-button
           >
           <input
-            ref="fileInput"
-            type="file"
-            @change="handleFileUpload"
-            style="display: none"
+              ref="fileInput"
+              type="file"
+              @change="handleFileUpload"
+              style="display: none"
           />
         </div>
         <el-form-item class="form-item">
           <el-button type="primary" @click="onSubmit" class="create-btn"
-            >创建</el-button
+          >创建</el-button
           >
         </el-form-item>
       </el-form>
@@ -157,22 +157,23 @@ const onSubmit = () => {
   //   userCapacity: form.value.userCapacity,
   // });
 
+  console.log(imageFiles.value[0])
   convertImageToBase64(
-    imageFiles.value[0],
-    (result) => {
-      console.log(result);
-      rs = result;
-      lobbyService.createRoom(
-        {
-          pieces: form.value.pieces,
-          userCapacity: form.value.userCapacity,
-        },
-        result
-      );
-    },
-    (error) => {
-      this.conversionError = error;
-    }
+      imageFiles.value[0],
+      (result) => {
+        console.log(result);
+        rs = result;
+        lobbyService.createRoom(
+            {
+              pieces: form.value.pieces,
+              userCapacity: form.value.userCapacity,
+            },
+            imageFiles.value[0]
+        );
+      },
+      (error) => {
+        this.conversionError = error;
+      }
   );
 };
 </script>
