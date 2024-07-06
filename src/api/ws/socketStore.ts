@@ -1,19 +1,23 @@
 import { defineStore } from 'pinia';
 import { useSocketGameService, SocketGameService } from '@/api/ws/socketGameService';
 import { StompSubscription, messageCallbackType } from '@stomp/stompjs';
-
+import { SocketGameData } from '@/shared/models/ws/SocketGameDataModel';
+import { BehaviorSubject } from 'rxjs';
 interface SocketState {
   client: SocketGameService | null;
+  socketGameDataSubject: BehaviorSubject<SocketGameData | null>
 }
 
 export const useSocketStore = defineStore('socket', {
   state: (): SocketState => ({
     client: null,
+    socketGameDataSubject: new BehaviorSubject<SocketGameData|null>(null)
   }),
   actions: {
     initializeClient() {
       if (!this.client) {
         this.client = useSocketGameService();
+        this.socketGameDataSubject = this.client.socketGameDataSubject
       }
     },
     async connectClient(playerName: string): Promise<void> {
@@ -29,7 +33,19 @@ export const useSocketStore = defineStore('socket', {
     },
     subscribe(destination: string, callback: messageCallbackType): StompSubscription | undefined {
       if (this.client) {
-        const subscription = this.client.subscribe(destination, callback);
+        const subscription = this.client.subscribe("/topic"+destination, callback);
+        if (subscription) {
+          return subscription;
+        } else {
+          console.error(`Subscription to ${destination} failed`);
+        }
+      } else {
+        console.error('Client not initialized');
+      }
+    },
+    subscribeUser(destination: string, callback: messageCallbackType): StompSubscription | undefined {
+      if (this.client) {
+        const subscription = this.client.subscribe("/user/topic"+destination, callback);
         if (subscription) {
           return subscription;
         } else {
@@ -41,7 +57,14 @@ export const useSocketStore = defineStore('socket', {
     },
     unsubscribe(destination: string) {
       if (this.client) {
-        this.client.unsubscribe(destination);
+        this.client.unsubscribe("/topic"+destination);
+      } else {
+        console.error('Client not initialized');
+      }
+    },
+    unsubscribeUser(destination: string) {
+      if (this.client) {
+        this.client.unsubscribe("/user/topic"+destination);
       } else {
         console.error('Client not initialized');
       }
@@ -53,9 +76,9 @@ export const useSocketStore = defineStore('socket', {
         console.error('Client not initialized');
       }
     },
-    sendCommand(destination: string, command: any) {
+    publish(destination: string, body: any) {
       if (this.client) {
-        this.client.publish(destination, command);
+        this.client.publish("/app"+destination, body);
       } else {
         console.error('Client not initialized');
       }
