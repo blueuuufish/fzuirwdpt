@@ -7,6 +7,11 @@ import Lobby_page from '../views/lobby/lobby_page.vue'
 import Create_Room from '../views/lobby/create_room.vue'
 const routes: Array<RouteRecordRaw> = [
   {
+    path: '/',
+    name: 'lobby',
+    component: Lobby
+  },
+  {
     path: '/lobby_nav',
     name: 'lobby_nav',
     component: Lobby_Nav
@@ -15,11 +20,6 @@ const routes: Array<RouteRecordRaw> = [
     path: '/create_room',
     name: 'create_room',
     component: Create_Room
-  },
-  {
-    path: '/',
-    name: 'lobby',
-    component: Lobby
   },
   {
     path: '/room',

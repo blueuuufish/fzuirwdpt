@@ -26,6 +26,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSocketGameService } from '@/api/ws/socketGameService';
+import {useServiceStore} from "@/store/service"
 
 const playerName = ref('');
 const playerNameTouched = ref(false);
@@ -36,12 +37,43 @@ const isValidPlayerName = computed(() => {
   return playerName.value.length >= 4;
 });
 
+const client = useServiceStore().socketGameService;
+const connectClient = (headers) => {
+  return new Promise((resolve, reject) => {
+    client.connect(headers, (error) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+const connectAndSubscribe = async () => {
+  try {
+    await connectClient("hijimi");
+    client.subscribe('/lobby', (message) => {
+      console.log(message);
+      const socketMessage = JSON.parse(message.body);
+      console.log("111" + socketMessage.message);
+    });
+  } catch (error) {
+    console.error('Failed to connect:', error);
+  }
+}
+
+
 const onSubmit = () => {
+  
+  connectAndSubscribe()
+  console.log('-----websocket connect-----');
   if (isValidPlayerName.value) {
     // 处理表单提交
     socketGameService.connect(playerName.value);
     console.log('表单已提交:', playerName.value);
-    router.push('/lobby_nav'); // 导航到房间页面
+    // connectAndSubscribe()
+    
+    router.push('/create_room'); // 导航到房间页面
   } else {
     playerNameTouched.value = true;
   }

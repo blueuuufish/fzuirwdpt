@@ -3,15 +3,14 @@ import { Stomp, CompatClient, StompSubscription, messageCallbackType } from '@st
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '@/environments/environment';
 import { SocketGameData } from '@/shared/models/ws/SocketGameDataModel';
-
 export interface SocketGameService {
   connect(playerName: string | null): Promise<void>;
   disconnect(): void;
   publish(destination: string, body: any): void;
   subscribe(destination: string, callback: messageCallbackType): StompSubscription | null;
-  subscribeUser(destination: string, callback: messageCallbackType): StompSubscription | null;
+  // subscribeUser(destination: string, callback: messageCallbackType): StompSubscription | null;
   unsubscribe(destination: string): void;
-  unsubscribeUser(destination: string): void;
+  // unsubscribeUser(destination: string): void;
   getUsername(): string | undefined;
   socketGameDataSubject: BehaviorSubject<SocketGameData | null>;
 }
@@ -36,11 +35,13 @@ export function useSocketGameService(): SocketGameService {
   };
 
   const onConnect = (frame: any) => {
-    console.log("socketGameService的onConnect函数被触发了");
-    stompClient?.publish({
-      destination: '/topic/all',
-      body: JSON.stringify({ message: 'hello world' }),
-    });
+    // console.log("socketGameService的onConnect函数被触发了");
+    socketGameDataSubject.next(new SocketGameData(frame.headers['user-name']))
+    console.log("CONNECTED");
+    // stompClient?.publish({
+    //   destination: '/topic/all',
+    //   body: JSON.stringify({ message: 'hello world' }),
+    // });
   };
 
   const onError = (error: any) => {
@@ -64,11 +65,13 @@ export function useSocketGameService(): SocketGameService {
   };
 
   const disconnect = () => {
-    console.log("ohhh, 我断开连接了");
-    
-    stompClient?.disconnect(() => {
-      console.log('Disconnected');
-    });
+    console.log("断开链接");
+    stompClient?.deactivate();
+    socketGameDataSubject.next(null);
+    console.log("已断开");
+    // stompClient?.disconnect(() => {
+    //   console.log('Disconnected');
+    // });
   };
 
   const publish = (destination: string, body: any) => {
@@ -93,14 +96,14 @@ export function useSocketGameService(): SocketGameService {
     }
   };
 
-  const subscribeUser = (destination: string, callback: messageCallbackType): StompSubscription | null => {
-    if (stompClient?.connected) {
-      return stompClient.subscribe(destination, callback);
-    } else {
-      console.error('Cannot subscribe, not connected');
-      return null;
-    }
-  };
+  // const subscribeUser = (destination: string, callback: messageCallbackType): StompSubscription | null => {
+  //   if (stompClient?.connected) {
+  //     return stompClient.subscribe(destination, callback);
+  //   } else {
+  //     console.error('Cannot subscribe, not connected');
+  //     return null;
+  //   }
+  // };
 
   const unsubscribe = (destination: string) => {
     if (stompClient?.connected) {
@@ -110,26 +113,27 @@ export function useSocketGameService(): SocketGameService {
     }
   };
 
-  const unsubscribeUser = (destination: string) => {
-    if (stompClient?.connected) {
-      stompClient.unsubscribe(destination);
-    } else {
-      console.error('Cannot unsubscribe, not connected');
-    }
-  };
+  // const unsubscribeUser = (destination: string) => {
+  //   if (stompClient?.connected) {
+  //     stompClient.unsubscribe(destination);
+  //   } else {
+  //     console.error('Cannot unsubscribe, not connected');
+  //   }
+  // };
 
   const getUsername = (): string | undefined => {
-    return stompClient?.connectHeaders?.playerName;
+    // return stompClient?.connectHeaders?.playerName;
+    return socketGameDataSubject.value?.username;
   };
 
-  return {
+  return{
     connect,
     disconnect,
     publish,
     subscribe,
-    subscribeUser,
+    // subscribeUser,
     unsubscribe,
-    unsubscribeUser,
+    // unsubscribeUser,
     getUsername,
     socketGameDataSubject,
   };

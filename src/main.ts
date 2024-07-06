@@ -12,6 +12,7 @@ const app = createApp(App)
 const pinia = createPinia();
 
 app.use(VueRx)
+app.use(pinia)
 app.use(ElementPlus)
 app.use(store)
 app.use(router)

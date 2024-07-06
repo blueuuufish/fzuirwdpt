@@ -2,7 +2,6 @@ import { ref, onUnmounted, defineEmits } from 'vue';
 import { BehaviorSubject } from 'rxjs';
 import { Room } from '@/shared/models/roomModel';
 import { useRouter } from 'vue-router';
-import { useSocketGameService } from '@/api/ws/socketGameService';
 import { IMessage, StompSubscription } from '@stomp/stompjs';
 import { throttle } from 'lodash-es';
 import { PuzzlePiece } from '@/shared/models/puzzlePieceModel';
@@ -12,6 +11,9 @@ import { RoomUser } from '@/shared/models/roomUserModel';
 import { SocketMessage } from '@/shared/models/ws/socketMessageModel';
 import { RoomUserJoinedDto } from '@/shared/models/dto/roomUserJoinedDto';
 import { RoomUserLeftDto } from '@/shared/models/dto/roomUserLeftDto';
+import { useSocketStore } from '../ws/socketStore';
+import { RoomInitialDataDto } from '@/shared/models/dto/roomInitialDataDto';
+
 
 export function useRoomService() {
   const emit = defineEmits(['roomEvent']);
@@ -19,7 +21,7 @@ export function useRoomService() {
   const stompSubscription = ref<StompSubscription | null>(null);
 
   const router = useRouter();
-  const socketGameService = useSocketGameService();
+  const socketGameService = useSocketStore();
 
   const sendMoveMessage = (puzzlePiece: PuzzlePiece) => {
     if (roomSubject.value.id) {
@@ -31,42 +33,64 @@ export function useRoomService() {
   };
 
   const sendMoveMessageThrottle = throttle(sendMoveMessage, 50, {});
-  const join = async (id: string, initialDataCallback: Function | null = null) => {
-    try {
-      await socketGameService.connect('playerName');
-      // 连接成功后订阅公共频道
-      socketGameService.subscribe('/topic/all', (message) => {
-        const body = JSON.parse(message.body);
-        console.log('Message from server: ', body.message);
-        // 处理接收到的 "hello world" 消息
-      });
+  const join = (id: string, initialDataCallback: Function | null = null) => {
+    const sub =  socketGameService.subscribe(SocketDestinations.Room + "/" + id,
+    (message: IMessage) => {
+     const socketMessage: SocketMessage = JSON.parse(message.body);
+     if(socketMessage.event === SocketEventType.Room_InitialData){
+       const socketMessageBody: RoomInitialDataDto = socketMessage.body;
 
-      // 连接成功后进行房间订阅
-      stompSubscription.value = socketGameService.subscribe(
-        `/QAQ${SocketDestinations.Room}/${id}`,
-        (message: IMessage) => {
-          const socketMessage = JSON.parse(message.body);
-          if (socketMessage.event === SocketEventType.Room_InitialData) {
-            const socketMessageBody = socketMessage.body;
-            socketMessageBody.room.users = socketMessageBody.room.users || [];
-            roomSubject.next(socketMessageBody.room);
-            if (initialDataCallback) {
-              initialDataCallback(socketMessageBody);
-            }
-          } else {
-            emit('roomEvent', socketMessage);
-          }
-        }
-      );
-    } catch (error) {
-      console.error("Failed to join room: ", error);
-    }
-  };
+       socketMessageBody.room.users = socketMessageBody.room.users.map(user => new RoomUser(user.username, user.colorId));
+       
+       setRoomSubject(socketMessageBody.room);
+       if(initialDataCallback !== null){
+         initialDataCallback(socketMessageBody);
+       }
+     }
+     receiveMessage(socketMessage);
+     router.push('/room');
+   })
+   if(sub){
+     stompSubscription.value = sub;
+   }
 
+  }
+  // const join = async (id: string, initialDataCallback: Function | null = null) => {
+  //   try {
+  //     await socketGameService.connectClient('playerName');
+  //     // 连接成功后订阅公共频道
+  //     socketGameService.subscribe('/topic/all', (message) => {
+  //       const body = JSON.parse(message.body);
+  //       console.log('Message from server: ', body.message);
+  //       // 处理接收到的 "hello world" 消息
+  //     });
+
+  //     // 连接成功后进行房间订阅
+  //     stompSubscription.value = socketGameService.subscribe(
+  //       `/QAQ${SocketDestinations.Room}/${id}`,
+  //       (message: IMessage) => {
+  //         const socketMessage = JSON.parse(message.body);
+  //         if (socketMessage.event === SocketEventType.Room_InitialData) {
+  //           const socketMessageBody = socketMessage.body;
+  //           socketMessageBody.room.users = socketMessageBody.room.users || [];
+  //           roomSubject.next(socketMessageBody.room);
+  //           if (initialDataCallback) {
+  //             initialDataCallback(socketMessageBody);
+  //           }
+  //         } else {
+  //           emit('roomEvent', socketMessage);
+  //         }
+  //       }
+  //     );
+  //   } catch (error) {
+  //     console.error("Failed to join room: ", error);
+  //   }
+  // };
 
 
   const setRoomSubject = (room: Room) => {
     roomSubject.next(room);
+    console.log('save room');
   };
 
   const detach = () => {
@@ -127,9 +151,9 @@ export function useRoomService() {
     return room.users.find((user) => user.username === username);
   };
 
-  onUnmounted(() => {
-    detach();
-  });
+  // onUnmounted(() => {
+  //   detach();
+  // });
 
   return {
     roomSubject,

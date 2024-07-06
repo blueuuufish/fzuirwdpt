@@ -12,7 +12,10 @@ import { ref, onUnmounted, defineEmits} from 'vue';
 import request from "@/utils/request";
 import { environment } from "@/environments/environment";
 import { AxiosResponse } from "axios";
-import { inject } from "vue";
+import { useServiceStore } from '@/store/service';
+import { useSocketStore } from "../ws/socketStore";
+// import {http} from '@/utils/http';
+
 
 
 export function useLobbyService() {
@@ -20,26 +23,33 @@ export function useLobbyService() {
   const roomListSubject: BehaviorSubject<Room[]>  = new BehaviorSubject([] as any);
   const creatingRoomSubject:BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   // const socketGameService = useSocketGameService();
-  const socketGameService = useSocketGameService();
-  const socketStore = useRoomService();
+  const socketGameService = useSocketStore();
+  const roomService = useRoomService();
   const stompSubscriptions = ref<StompSubscription[]>([]);
-  const asd = inject<typeof useSocketGameService>('socketClient');
-  // const join = (initialDataCallback: Function) => {
-  //     stompSubscriptions.value.push(
-  //       socketGameService.subscribe(SocketDestinations.Lobby,(message:IMessage)=>{
-  //         const socketMessage: SocketMessage = JSON.parse(message.body);
-  //         if(socketMessage.event === SocketEventType.Lobby_InitialData){
-  //             setRoomListSubject(socketMessage.body.rooms);
-  //             initialDataCallback(socketMessage.body);
-  //         }
-  //         receiveMessage(socketMessage);
-  //       }),
-  //       socketGameService.subscribeUser(SocketDestinations.Lobby,(message:IMessage)=>{
-  //         const socketMessage: SocketMessage = JSON.parse(message.body);
-  //         receiveMessage(socketMessage);
-  //       })
-  //     );
-  // };
+  const join = (initialDataCallback: Function) => {
+    const stompSubscription = socketGameService.subscribe(SocketDestinations.Lobby,(message: IMessage)=>{
+      const socketMessage: SocketMessage = JSON.parse(message.body);
+      if(socketMessage.event === SocketEventType.Lobby_InitialData){
+        setRoomListSubject(socketMessage.body.rooms);
+        initialDataCallback(socketMessage.body);
+      }
+      receiveMessage(socketMessage);
+    });
+    const stompSubscriptionUser = socketGameService.subscribeUser(
+      SocketDestinations.Lobby, (message: IMessage) => {
+        const socketMessage: SocketMessage = JSON.parse(message.body);
+
+        receiveMessage(socketMessage);
+      }
+    );
+    if(stompSubscription && stompSubscriptionUser){
+      stompSubscriptions.value.push(
+        stompSubscription,
+        stompSubscriptionUser
+      );
+    }
+      
+  };
 
   const setRoomListSubject = (roomList : Room[]) => {
       roomListSubject.next(roomList);
@@ -51,9 +61,9 @@ export function useLobbyService() {
   //     .then((response: AxiosResponse<Room[]>) => response.data)
   //   );
   // }
-  const getRooms = () => {
-    return request.get<Room[]>({url:`${environment.apiUrl}/rooms`});
-  }
+  // const getRooms = () => {
+  //   return request.get<Room[]>({url:`${environment.apiUrl}/rooms`});
+  // }
   const detach = () => {
     socketGameService.unsubscribe(SocketDestinations.Lobby);
     socketGameService.unsubscribeUser(SocketDestinations.Lobby);
@@ -62,20 +72,24 @@ export function useLobbyService() {
     }
     stompSubscriptions.value = [];
   }
-  // TODO: 未测试 未调用roomService
-  const createRoom = (lobbyCreateRoom: LobbyCreateRoomDto, imageFile: File) => {
 
+  const createRoom = (lobbyCreateRoom: LobbyCreateRoomDto, imageFile: File) => {
+    console.log('------')
+    console.log(imageFile);
     const formData: FormData = new FormData();
     formData.append('file', imageFile);
     const jsonBlob = new Blob([JSON.stringify(lobbyCreateRoom)], { type: 'application/json' });
         formData.append('dto', jsonBlob, 'dto.json');
+    console.log("===");
+    console.log(formData. get("file"));
     
     request.post({
       url: `${environment.apiUrl}/rooms`,
       data: formData
     }).then((room:Room)=> {
       // console.log(data)
-      // roomService.join(room.id); 
+      // TODO: 订阅？？？
+      roomService.join(room.id); 
     })
    
   }
@@ -98,8 +112,8 @@ export function useLobbyService() {
   return {
       creatingRoomSubject,
       roomListSubject,
-      // join,
-      getRooms,
+      join,
+      // getRooms,
       setRoomListSubject,
       detach,
       createRoom,
