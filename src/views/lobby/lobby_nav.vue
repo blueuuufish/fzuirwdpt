@@ -1,69 +1,66 @@
 <template>
   <v-toolbar class="navbar">
-    <v-btn @click="clickOnBackBtn">
-      Back
-    </v-btn>
+    <v-btn @click="clickOnBackBtn"> Back </v-btn>
     <span class="spacer"></span>
     <div id="username-panel">
       {{ socketGameData?.username }}
     </div>
-    <v-btn @click="clickOnCreateRoomBtn">
-      Create Room
-    </v-btn>
+    <v-btn @click="clickOnCreateRoomBtn"> Create Room </v-btn>
   </v-toolbar>
+  <el-button @click="handleButtonClick">Default</el-button>
 </template>
 
-<script>
-import {ref, onMounted, onBeforeUnmount} from 'vue';
-import {useRouter} from 'vue-router';
-import {useLobbyService} from '@/api/lobby/lobbyService'; // 假设你有实现这些服务
-import {useSocketGameService} from '@/api/ws/socketGameService'
-export default {
-  name: 'LobbyNav',
-  setup() {
-    const socketGameData = ref(null);
-    const creatingRoom = ref(false);
-    const subscriptions = [];
-    const router = useRouter();
-    const socketGameService = useSocketGameService();
-    const lobbyService = useLobbyService();
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from "vue";
+import { useRouter } from "vue-router";
+import { useSocketStore } from "@/api/ws/socketStore";
+import { IMessage, StompSubscription } from "@stomp/stompjs";
+import { SocketDestinations } from "@/shared/enums/socketDestinationsEnum";
+import { SocketEventType } from "@/shared/enums/socketEventTypeEnum";
+import { defineEmits } from "vue";
 
-    onMounted(() => {
-      subscriptions.push(
-          socketGameService.socketGameDataSubject.subscribe(data => {
-            socketGameData.value = data;
-          }),
-          lobbyService.creatingRoomSubject.subscribe(creating => {
-            creatingRoom.value = creating;
-          })
-      );
+const emit = defineEmits(["roomEvent"]);
+const socketGameData = ref(null);
+const creatingRoom = ref(false);
+const subscriptions = [];
+const router = useRouter();
+const socketStore = useSocketStore();
+const stompSubscription = (ref < StompSubscription) | (null > null);
 
-      socketGameData.value = socketGameService.socketGameDataSubject.value;
+onMounted(async () => {});
+
+onBeforeUnmount(() => {
+  subscriptions.forEach((sub) => sub.unsubscribe());
+  if (stompSubscription.value) {
+    stompSubscription.value.unsubscribe();
+  }
+});
+
+const clickOnBackBtn = () => {
+  // if (!creatingRoom.value) {
+  //   socketStore.disconnectClient();
+  // }
+  // router.push('/');
+};
+
+const clickOnCreateRoomBtn = () => {
+  creatingRoom.value = true;
+  // Here you can add the logic to navigate to the create room page
+  // router.push('/create_room');
+};
+
+const handleButtonClick = async () => {
+  const roomId = "someRoomId"; // Replace 'someRoomId' with the actual room ID
+  try {
+    const subscription = socketStore.subscribe('/topic/all', (message) => {
+      console.log('Message received.');
+      const socketMessage = JSON.parse(message.body);
+      console.log('我接受了消息：' + socketMessage.message);
     });
-
-    onBeforeUnmount(() => {
-      subscriptions.forEach(sub => sub.unsubscribe());
-    });
-
-    const clickOnBackBtn = () => {
-      if (!creatingRoom.value) {
-        socketGameService.disconnect();
-      }
-      router.push('/');
-      lobbyService.changeCreatingRoom(false);
-    };
-
-    const clickOnCreateRoomBtn = () => {
-      lobbyService.changeCreatingRoom(true);
-      // router.push('/create_room');
-    };
-
-    return {
-      socketGameData,
-      clickOnBackBtn,
-      clickOnCreateRoomBtn,
-    };
-  },
+    console.log(subscription);
+  } catch (error) {
+    console.error("Failed to connect or subscribe:", error);
+  }
 };
 </script>
 

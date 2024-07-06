@@ -1,72 +1,128 @@
-import { onUnmounted } from 'vue';
-// import { useAuthStorage } from '@/api/auth/authStorageService'; // 假设 useAuthStorage 是你定义的 composable
-import { useSocketClient } from '@/api/ws/socketClientService'; // 假设 useSocketClient 是你定义的 composable
+import SockJS from 'sockjs-client';
+import { Stomp, CompatClient, StompSubscription, messageCallbackType } from '@stomp/stompjs';
 import { BehaviorSubject } from 'rxjs';
-import { StompSubscription, messageCallbackType } from '@stomp/stompjs';
+import { environment } from '@/environments/environment';
 import { SocketGameData } from '@/shared/models/ws/SocketGameDataModel';
 
-export function useSocketGameService() {
-  const socketGameDataSubject:BehaviorSubject<SocketGameData | null> = new BehaviorSubject<SocketGameData | null>(null)
+export interface SocketGameService {
+  connect(playerName: string | null): Promise<void>;
+  disconnect(): void;
+  publish(destination: string, body: any): void;
+  subscribe(destination: string, callback: messageCallbackType): StompSubscription | null;
+  subscribeUser(destination: string, callback: messageCallbackType): StompSubscription | null;
+  unsubscribe(destination: string): void;
+  unsubscribeUser(destination: string): void;
+  getUsername(): string | undefined;
+  socketGameDataSubject: BehaviorSubject<SocketGameData | null>;
+}
 
-  // const authStorageService = useAuthStorage();
-  const socketClientService = useSocketClient();
+export function useSocketGameService(): SocketGameService {
+  let stompClient: CompatClient | null = null;
 
-  const connect = (playerName = null) => {
-    let headers:any = {};
-    headers["Player-Name"] = playerName ?? "";
-    // if (authStorageService.getToken()) {
-    //   headers["Authorization"] = `Bearer ${authStorageService.getToken()}`;
-    // } else {
-    //   headers["Player-Name"] = playerName ?? "";
-    // }
+  const socketGameDataSubject = new BehaviorSubject<SocketGameData | null>(null);
 
-    socketClientService.initializeWebSocketConnection(headers, (frame:any) => onConnect(frame));
+  const initializeWebSocketConnection = (connectHeaders: any, connectCallback: Function) => {
+    const ws = new SockJS(environment.wsApiUrl);
+    stompClient = Stomp.over(() => ws);
+    stompClient.onConnect = (frame: any) => {
+      onConnect(frame);
+      connectCallback(frame);
+    };
+    stompClient.onWebSocketClose = onError;
+    stompClient.onDisconnect = onError;
+    stompClient.onStompError = onError;
+    stompClient.connectHeaders = connectHeaders;
+    stompClient.activate();
+  };
+
+  const onConnect = (frame: any) => {
+    console.log("socketGameService的onConnect函数被触发了");
+    stompClient?.publish({
+      destination: '/topic/all',
+      body: JSON.stringify({ message: 'hello world' }),
+    });
+  };
+
+  const onError = (error: any) => {
+    console.error('WebSocket Error: ', error);
+  };
+
+  const connect = (playerName: string | null): Promise<void> => {
+    console.log("socketGameService的connect函数被触发了");
+    return new Promise<void>((resolve, reject) => {
+      const connectHeaders = { playerName };
+      try {
+        initializeWebSocketConnection(connectHeaders, () => {
+          // console.log(`Connected as ${playerName}`);
+          resolve();
+        });
+      } catch (error) {
+        console.error('Connection Error:', error);
+        reject(error);
+      }
+    });
   };
 
   const disconnect = () => {
-    socketClientService.disconnectWebSocketConnection();
-    setSocketGameData(null);
+    console.log("ohhh, 我断开连接了");
+    
+    stompClient?.disconnect(() => {
+      console.log('Disconnected');
+    });
   };
 
-  const publish = (destination:string, body:any) => {
-    socketClientService.publish("/app" + destination, body);
+  const publish = (destination: string, body: any) => {
+    console.log("socketGameService的publish函数被触发了");
+    if (stompClient?.connected) {
+      stompClient.publish({
+        destination,
+        body: JSON.stringify(body),
+      });
+    } else {
+      console.error('Cannot publish, not connected');
+    }
   };
 
-  const subscribe = (destination:string, callback: messageCallbackType) => {
-    return socketClientService.subscribe("/topic" + destination, callback);
+  const subscribe = (destination: string, callback: messageCallbackType): StompSubscription | null => {
+    console.log("socketGameService的subscribe函数被触发了");
+    if (stompClient?.connected) {
+      return stompClient.subscribe(destination, callback);
+    } else {
+      console.error('Cannot subscribe, not connected');
+      return null;
+    }
   };
 
-  const subscribeUser = (destination: string, callback: messageCallbackType): StompSubscription => {
-    return socketClientService.subscribe("/user/topic" + destination, callback);
+  const subscribeUser = (destination: string, callback: messageCallbackType): StompSubscription | null => {
+    if (stompClient?.connected) {
+      return stompClient.subscribe(destination, callback);
+    } else {
+      console.error('Cannot subscribe, not connected');
+      return null;
+    }
   };
 
-  const unsubscribe = (destination:string) => {
-    socketClientService.unsubscribe("/topic" + destination);
+  const unsubscribe = (destination: string) => {
+    if (stompClient?.connected) {
+      stompClient.unsubscribe(destination);
+    } else {
+      console.error('Cannot unsubscribe, not connected');
+    }
   };
 
-  const unsubscribeUser = (destination:string) => {
-    socketClientService.unsubscribe("/user/topic" + destination);
+  const unsubscribeUser = (destination: string) => {
+    if (stompClient?.connected) {
+      stompClient.unsubscribe(destination);
+    } else {
+      console.error('Cannot unsubscribe, not connected');
+    }
   };
 
-  const getUsername = () => {
-    return socketGameDataSubject.value?.username;
+  const getUsername = (): string | undefined => {
+    return stompClient?.connectHeaders?.playerName;
   };
-
-  const onConnect = (frame:any) => {
-    setSocketGameData({ username: frame.headers["user-name"] });
-  };
-
-  const setSocketGameData = (socketGameData: SocketGameData| null) => {
-    // console.log(socketGameData)
-    socketGameDataSubject.next(socketGameData)
-  };
-
-  // onUnmounted(() => {
-  //   disconnect();
-  // });
 
   return {
-    socketGameDataSubject,
     connect,
     disconnect,
     publish,
@@ -75,5 +131,6 @@ export function useSocketGameService() {
     unsubscribe,
     unsubscribeUser,
     getUsername,
+    socketGameDataSubject,
   };
 }

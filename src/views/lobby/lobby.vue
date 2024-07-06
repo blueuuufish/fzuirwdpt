@@ -16,16 +16,16 @@
 import { defineComponent, ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRoomService } from '@/api/room/roomService';
 import { useLobbyService } from '@/api/lobby/lobbyService';
-import LobbyNav from '@/views/lobby/lobby_nav.vue';
-import CreateRoom from '@/views/lobby/create_room.vue';
+// import LobbyNav from '@/views/lobby/lobby_nav.vue';
+// import CreateRoom from '@/views/lobby/create_room.vue';
 import LobbyRoomBlock from '@/views/lobby/lobby_room.vue';
 import { Room } from '@/shared/models/roomModel';
 import {SocketMessage} from "@/shared/models/ws/socketMessageModel";
 
 export default defineComponent({
   components: {
-    LobbyNav,
-    CreateRoom,
+    // LobbyNav,
+    // CreateRoom,
     LobbyRoomBlock
   },
   setup() {
@@ -48,7 +48,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      lobbyService.join((message: any) => loadInitialData(message));
+      // lobbyService.join((message: any) => loadInitialData(message));
 
       subscriptions.value.push(
           lobbyService.creatingRoomSubject.subscribe((creatingRoom2: boolean) => {
@@ -56,9 +56,9 @@ export default defineComponent({
           }),
           // lobbyService.$emit("lobbyEvent").subscribe((message: any) => lobbyEvent(message)),
           // lobbyEvent(lobbyService.$emit("lobbyEvent").message),
-          lobbyService.$emit("lobbyEvent").subscribe((message:SocketMessage) => {
-            lobbyEvent(message);
-          }),
+          // lobbyService.$emit("lobbyEvent").subscribe((message:SocketMessage) => {
+          //   lobbyEvent(message);
+          // }),
           lobbyService.roomListSubject.subscribe((roomList: Room[]) => {
             rooms.value = roomList;
           })

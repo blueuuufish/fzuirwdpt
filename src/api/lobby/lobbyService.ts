@@ -21,25 +21,25 @@ export function useLobbyService() {
   const creatingRoomSubject:BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   // const socketGameService = useSocketGameService();
   const socketGameService = useSocketGameService();
-  const roomService = useRoomService();
+  const socketStore = useRoomService();
   const stompSubscriptions = ref<StompSubscription[]>([]);
   const asd = inject<typeof useSocketGameService>('socketClient');
-  const join = (initialDataCallback: Function) => {
-      stompSubscriptions.value.push(
-        socketGameService.subscribe(SocketDestinations.Lobby,(message:IMessage)=>{
-          const socketMessage: SocketMessage = JSON.parse(message.body);
-          if(socketMessage.event === SocketEventType.Lobby_InitialData){
-              setRoomListSubject(socketMessage.body.rooms);
-              initialDataCallback(socketMessage.body);
-          }
-          receiveMessage(socketMessage);
-        }),
-        socketGameService.subscribeUser(SocketDestinations.Lobby,(message:IMessage)=>{
-          const socketMessage: SocketMessage = JSON.parse(message.body);
-          receiveMessage(socketMessage);
-        })
-      );
-  };
+  // const join = (initialDataCallback: Function) => {
+  //     stompSubscriptions.value.push(
+  //       socketGameService.subscribe(SocketDestinations.Lobby,(message:IMessage)=>{
+  //         const socketMessage: SocketMessage = JSON.parse(message.body);
+  //         if(socketMessage.event === SocketEventType.Lobby_InitialData){
+  //             setRoomListSubject(socketMessage.body.rooms);
+  //             initialDataCallback(socketMessage.body);
+  //         }
+  //         receiveMessage(socketMessage);
+  //       }),
+  //       socketGameService.subscribeUser(SocketDestinations.Lobby,(message:IMessage)=>{
+  //         const socketMessage: SocketMessage = JSON.parse(message.body);
+  //         receiveMessage(socketMessage);
+  //       })
+  //     );
+  // };
 
   const setRoomListSubject = (roomList : Room[]) => {
       roomListSubject.next(roomList);
@@ -64,22 +64,18 @@ export function useLobbyService() {
   }
   // TODO: 未测试 未调用roomService
   const createRoom = (lobbyCreateRoom: LobbyCreateRoomDto, imageFile: File) => {
-    console.log('------')
-    console.log(imageFile);
+
     const formData: FormData = new FormData();
     formData.append('file', imageFile);
-    console.log(formData);
     const jsonBlob = new Blob([JSON.stringify(lobbyCreateRoom)], { type: 'application/json' });
         formData.append('dto', jsonBlob, 'dto.json');
-    console.log("===");
-    console.log(formData. get("file"));
     
     request.post({
       url: `${environment.apiUrl}/rooms`,
       data: formData
     }).then((room:Room)=> {
       // console.log(data)
-      roomService.join(room.id); 
+      // roomService.join(room.id); 
     })
    
   }
@@ -102,7 +98,7 @@ export function useLobbyService() {
   return {
       creatingRoomSubject,
       roomListSubject,
-      join,
+      // join,
       getRooms,
       setRoomListSubject,
       detach,
