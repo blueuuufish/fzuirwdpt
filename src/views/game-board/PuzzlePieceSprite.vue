@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div ref="spriteContainer" class="sprite-container"></div>
 </template>
 
@@ -203,4 +203,4 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-</style>
+</style> -->

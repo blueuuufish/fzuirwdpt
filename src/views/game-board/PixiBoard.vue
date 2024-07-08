@@ -1,16 +1,18 @@
-<!-- <template>
+<template>
   <div class="align-center" ref="pixiContainer" id="pixiContainer"></div>
 </template>
 
 <script lang="ts">
-import { ref, onMounted, onBeforeUnmount,defineComponent } from 'vue';
-import { Application, Assets, Container, setPositions, Sprite, Texture } from 'pixi.js';
+import { ref, onMounted, onBeforeUnmount,defineComponent, getCurrentInstance } from 'vue';
+import { Application, Assets, Container, Sprite, Texture } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
-import PuzzlePieceSprite from './PuzzlePieceSprite.vue';
+// import PuzzlePieceSprite from './PuzzlePieceSprite.vue';
 import { PuzzlePiece } from '@/shared/models/puzzlePieceModel'
 import { Puzzle } from '@/shared/models/puzzleModel'
 import { RoomUser } from '@/shared/models/roomUserModel'
 // TODO: 修改 import { GameBoardComponent } from '../game-board/game-board.component';
+import { PuzzlePieceSprite } from './PuzzelePieceSprite'
+import {usePixiBoard} from './pixiBoard'
 
 
 // TODO: 检查逻辑是否一致
@@ -18,18 +20,19 @@ export default defineComponent({
   name: 'PixiBoard',
   props: {},
   setup() {
-    const pixiContainer = ref<HTMLDivElement | null>(null);
-    const pixiApp = ref<Application | null>(null);
-    const pixiViewport = ref<Viewport | null>(null);
-    const pieceContainer = ref(new Container());
-    //TODO: const pieceMap = ref(new Map<number, typeof PuzzlePieceSprite[]>());PuzzlePieceSprite' refers to a value, but is being used as a type here. Did you mean 'typeof PuzzlePieceSprite'?Vetur(2749)
-    const puzzlePieces = ref<typeof PuzzlePieceSprite[][]>([]);
-    const pieceMap = ref(new Map<number, typeof PuzzlePieceSprite[]>());
-    const worldWidth = 2000;
-    const worldHeight = 1500;
-    const puzzleTexture = ref<Texture | null>(null);
-    const puzzle = ref<Puzzle | null>(null);
-    const activePuzzlePiece = ref<typeof PuzzlePieceSprite | null>(null);
+    // const pixiContainer = ref<HTMLDivElement | null>(null);
+    // const pixiApp = ref<Application | null>(null);
+    // const pixiViewport = ref<Viewport | null>(null);
+    // const pieceContainer = ref(new Container());
+    // //TODO: const pieceMap = ref(new Map<number, typeof PuzzlePieceSprite[]>());PuzzlePieceSprite' refers to a value, but is being used as a type here. Did you mean 'typeof PuzzlePieceSprite'?Vetur(2749)
+    // const puzzlePieces = ref<typeof PuzzlePieceSprite[][]>([]);
+    // const pieceMap = ref(new Map<number, typeof PuzzlePieceSprite[]>());
+    // const worldWidth = 2000;
+    // const worldHeight = 1500;
+    // const puzzleTexture = ref<Texture | null>(null);
+    // const puzzle = ref<Puzzle | null>(null);
+    // const activePuzzlePiece = ref<typeof PuzzlePieceSprite | null>(null);
+    const {pixiContainer,pixiApp,pixiViewport,pieceContainer,puzzlePieces,pieceMap,worldWidth,worldHeight,puzzleTexture,puzzle,activePuzzlePiece,onDragMove } = usePixiBoard()
 
     onMounted(() => {
       if (pixiContainer.value) {
@@ -118,10 +121,13 @@ export default defineComponent({
 
       puzzlePieces.value = new Array(piecesX).fill(undefined).map(() => new Array(piecesY).fill(undefined));
 
+      const { ctx } = getCurrentInstance() as any
+      const _this = ctx      
+
       for (let i = 0; i < piecesY; i++) {
         for (let j = 0; j < piecesX; j++) {
           const piece = pieces[i * piecesX + j];
-          const pieceSprite = new PuzzlePieceSprite(puzzleTexture.value!, pieceWidth, pieceHeight, j, i, scaleX, scaleY, piecesDimensions);
+          const pieceSprite = new PuzzlePieceSprite(_this, puzzleTexture.value!, pieceWidth, pieceHeight, j, i, scaleX, scaleY, piecesDimensions);
           pieceSprite.setPosition(piece.position[0], piece.position[1]);
           setGroup(pieceSprite, piece.group);
 
@@ -170,4 +176,4 @@ export default defineComponent({
   width: 100%;
   height: 100%;
 }
-</style> -->
+</style>

@@ -21,6 +21,8 @@ export function useSocketGameService(): SocketGameService {
   const socketGameDataSubject = new BehaviorSubject<SocketGameData | null>(null);
 
   const initializeWebSocketConnection = (connectHeaders: any, connectCallback: Function) => {
+    console.log("connectHeaders")
+    console.log(connectHeaders['playerName'])
     const ws = new SockJS(environment.wsApiUrl);
     stompClient = Stomp.over(() => ws);
     stompClient.onConnect = (frame: any) => {
@@ -49,11 +51,14 @@ export function useSocketGameService(): SocketGameService {
   };
 
   const connect = (playerName: string | null): Promise<void> => {
+    let headers:any = {};
     console.log("socketGameService的connect函数被触发了");
+    console.log(playerName)
     return new Promise<void>((resolve, reject) => {
-      const connectHeaders = { playerName };
+      // const connectHeaders = { playerName };
+      headers["Player-Name"] = playerName ?? "";
       try {
-        initializeWebSocketConnection(connectHeaders, () => {
+        initializeWebSocketConnection(headers, () => {
           // console.log(`Connected as ${playerName}`);
           resolve();
         });

@@ -1,11 +1,6 @@
 <template>
-  <MainPanel title='create room'>
+  <MainPanel title='Create Room'>
     <el-card class="box-card" shadow="hover">
-      <template #header>
-        <div class="header">
-          <span>创建房间</span>
-        </div>
-      </template>
       <el-form
         :model="form"
         :rules="rules"
@@ -66,7 +61,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { useLobbyService } from "@/api/lobby/lobbyService";
+import { useLobbyStore } from "@/api/lobby/lobbyStore";
 import { LobbyCreateRoomDto } from "@/shared/models/dto/lobbyCreateRoomDto";
 import convertImageToBase64 from "@/utils/convertImageToBase64";
 import {useSocketStore} from "@/api/ws/socketStore"
@@ -93,52 +88,7 @@ const imagePaths = [
   require('@/assets/default_images/default006.jpg'),
 ];
 
-// const client = useSocketGameService();
-// const connectClient = (headers) => {
-//   return new Promise((resolve, reject) => {
-//     client.connect(headers, (error) => {
-//       if (error) {
-//         reject(error);
-//       } else {
-//         resolve();
-//       }
-//     });
-//   });
-// };
-const connectAndSubscribe = async () => {
-  try {
-    const socketStore = useSocketStore();
-    socketStore.initializeClient();
-    console.log('初始化WebSocket client...');
-    await socketStore.connectClient('playerName');
-    console.log('WebSocket已连接.');
-
-    // const subscription = socketStore.subscribe('/topic/2', (message) => {
-    //   console.log('Message received.');
-    //   const socketMessage = JSON.parse(message.body);
-    //   console.log('我接受了消息：' + socketMessage.message);
-    // });
-
-    // if (subscription) {
-    //   console.log('订阅到：/lobby/2');
-    // } else {
-    //   console.log('失败订阅/lobby/2');
-    // }
-
-    // console.log('Sending command...');
-    // socketStore.sendCommand('/lobby/2', {
-    //   type: 'COMMAND_TYPE',
-    //   payload: 'your_payload',
-    // });
-    // console.log('Command sent.');
-  } catch (error) {
-    console.error('Failed to connect or subscribe:', error);
-  }
-};
-
 onMounted(async () => {
- 
-  // console.log('WebSocket client initialized.');
 
   for (const path of imagePaths) {
     const response = await fetch(path);
@@ -149,8 +99,6 @@ onMounted(async () => {
     imageFiles.value.push(file);
     defaultImages.value.push(URL.createObjectURL(file));
   }
-  // connectAndSubscribe()
-  // provide('socketClient',client)
 });
 
 const selectImage = (image) => {
@@ -179,7 +127,7 @@ const handleFileUpload = (event) => {
 const fileInput = ref(null);
 
 const onSubmit = () => {
-  const lobbyService = useLobbyService();
+  const lobbyService = useLobbyStore();
   lobbyService.createRoom(
     {
       pieces: form.value.pieces,
@@ -188,7 +136,7 @@ const onSubmit = () => {
     imageFiles.value[0]
   );
   // const router = useRouter();
-  router.push('/lobby_nav'); // 导航到房间页面
+  // router.push('/lobby_nav'); // 导航到房间页面
 };
 </script>
 

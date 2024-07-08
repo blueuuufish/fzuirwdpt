@@ -15,10 +15,18 @@ import { AxiosResponse } from "axios";
 import { useServiceStore } from '@/store/service';
 import { useSocketStore } from "../ws/socketStore";
 // import {http} from '@/utils/http';
+export interface LobbyService {
+  join(initialDataCallback: Function): void;
+  creatingRoomSubject:BehaviorSubject<boolean>;
+  roomListSubject: BehaviorSubject<Room[]>;
+  setRoomListSubject(roomList : Room[]): void;
+  detach(): void;
+  createRoom(lobbyCreateRoom: LobbyCreateRoomDto, imageFile: File): void;
+  changeCreatingRoom(creatingRoom: boolean): void;
+}
 
 
-
-export function useLobbyService() {
+export function useLobbyService():LobbyService {
   const emit = defineEmits(['lobbyEvent']);
   const roomListSubject: BehaviorSubject<Room[]>  = new BehaviorSubject([] as any);
   const creatingRoomSubject:BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);

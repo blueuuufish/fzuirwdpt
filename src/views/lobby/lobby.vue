@@ -1,5 +1,5 @@
 <template>
-  <LobbyNav />
+  <LobbyNav/>
   <div class="container">
     <CreateRoom v-if="creatingRoom" />
     <template v-else>
@@ -12,82 +12,83 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { defineComponent, ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRoomService } from '@/api/room/roomService';
 import { useLobbyService } from '@/api/lobby/lobbyService';
 // import LobbyNav from '@/views/lobby/lobby_nav.vue';
-// import CreateRoom from '@/views/lobby/create_room.vue';
+// import CreateRoom from '@/views/lobby/CreateRoom/index.vue';
 import LobbyRoomBlock from '@/views/lobby/lobby_room.vue';
 import { Room } from '@/shared/models/roomModel';
 import {SocketMessage} from "@/shared/models/ws/socketMessageModel";
 
-export default defineComponent({
-  components: {
-    // LobbyNav,
-    // CreateRoom,
-    LobbyRoomBlock
-  },
-  setup() {
-    const creatingRoom = ref(false);
-    const rooms = ref<Room[]>([]);
-    const subscriptions = ref<any[]>([]); // 管理订阅
 
-    const roomService = useRoomService();
-    const lobbyService = useLobbyService();
+// export default defineComponent({
+//   components: {
+//     // LobbyNav,
+//     // CreateRoom,
+//     LobbyRoomBlock
+//   },
+//   setup() {
+//     const creatingRoom = ref(false);
+//     const rooms = ref<Room[]>([]);
+//     const subscriptions = ref<any[]>([]); // 管理订阅
 
-    const loadInitialData = (initialData: any) => {
-      // rooms.value = of(initialData.rooms);
-    };
+//     const roomService = useRoomService();
+//     const lobbyService = useLobbyService();
 
-    const lobbyEvent = (message: any) => {
-      if (message.event === 'UserLobby_FailedToJoinToRoom') {
-        console.log("Failed to join");
-        // TODO: ROOM FAILED TO JOIN EVENT
-      }
-    };
+//     const loadInitialData = (initialData: any) => {
+//       // rooms.value = of(initialData.rooms);
+//     };
 
-    onMounted(() => {
-      // lobbyService.join((message: any) => loadInitialData(message));
+//     const lobbyEvent = (message: any) => {
+//       if (message.event === 'UserLobby_FailedToJoinToRoom') {
+//         console.log("Failed to join");
+//         // TODO: ROOM FAILED TO JOIN EVENT
+//       }
+//     };
 
-      subscriptions.value.push(
-          lobbyService.creatingRoomSubject.subscribe((creatingRoom2: boolean) => {
-            creatingRoom.value = creatingRoom2;
-          }),
-          // lobbyService.$emit("lobbyEvent").subscribe((message: any) => lobbyEvent(message)),
-          // lobbyEvent(lobbyService.$emit("lobbyEvent").message),
-          // lobbyService.$emit("lobbyEvent").subscribe((message:SocketMessage) => {
-          //   lobbyEvent(message);
-          // }),
-          lobbyService.roomListSubject.subscribe((roomList: Room[]) => {
-            rooms.value = roomList;
-          })
-      );
+//     onMounted(() => {
+//       // lobbyService.join((message: any) => loadInitialData(message));
 
-      rooms.value = lobbyService.roomListSubject.value;
-    });
+//       subscriptions.value.push(
+//           lobbyService.creatingRoomSubject.subscribe((creatingRoom2: boolean) => {
+//             creatingRoom.value = creatingRoom2;
+//           }),
+//           // lobbyService.$emit("lobbyEvent").subscribe((message: any) => lobbyEvent(message)),
+//           // lobbyEvent(lobbyService.$emit("lobbyEvent").message),
+//           // lobbyService.$emit("lobbyEvent").subscribe((message:SocketMessage) => {
+//           //   lobbyEvent(message);
+//           // }),
+//           lobbyService.roomListSubject.subscribe((roomList: Room[]) => {
+//             rooms.value = roomList;
+//           })
+//       );
 
-    onBeforeUnmount(() => {
-      subscriptions.value.forEach((sub: any) => sub.unsubscribe());
-      subscriptions.value = [];
-    });
+//       rooms.value = lobbyService.roomListSubject.value;
+//     });
 
-    const clickOnCreateRoomBtn = () => {
-      creatingRoom.value = true;
-    };
+//     onBeforeUnmount(() => {
+//       subscriptions.value.forEach((sub: any) => sub.unsubscribe());
+//       subscriptions.value = [];
+//     });
 
-    const changeCreatingRoom = (creating: boolean) => {
-      creatingRoom.value = creating;
-    };
+//     const clickOnCreateRoomBtn = () => {
+//       creatingRoom.value = true;
+//     };
 
-    return {
-      creatingRoom,
-      rooms,
-      clickOnCreateRoomBtn,
-      changeCreatingRoom
-    };
-  }
-});
+//     const changeCreatingRoom = (creating: boolean) => {
+//       creatingRoom.value = creating;
+//     };
+
+//     return {
+//       creatingRoom,
+//       rooms,
+//       clickOnCreateRoomBtn,
+//       changeCreatingRoom
+//     };
+//   }
+// });
 </script>
 
 <style scoped>
