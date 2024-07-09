@@ -1,4 +1,4 @@
-import { ref, onUnmounted, defineEmits } from 'vue';
+import { ref, onUnmounted, defineEmits, getCurrentInstance } from 'vue';
 import { BehaviorSubject } from 'rxjs';
 import { Room } from '@/shared/models/roomModel';
 import { useRouter } from 'vue-router';
@@ -13,6 +13,7 @@ import { RoomUserJoinedDto } from '@/shared/models/dto/roomUserJoinedDto';
 import { RoomUserLeftDto } from '@/shared/models/dto/roomUserLeftDto';
 import { useSocketStore } from '../ws/socketStore';
 import { RoomInitialDataDto } from '@/shared/models/dto/roomInitialDataDto';
+import { eventBus } from '@/api/common/eventBus';
 
 export interface RoomService {
   roomSubject: BehaviorSubject<Room>;
@@ -25,7 +26,8 @@ export interface RoomService {
 }
 
 export function useRoomService() {
-  const emit = defineEmits(['roomEvent']);
+   //调用父组件方法，需要定义方法名
+  // const emit = defineEmits(['roomEvent']);
   const roomSubject: BehaviorSubject<Room> = new BehaviorSubject({} as any);
   const stompSubscription = ref<StompSubscription | null>(null);
 
@@ -57,7 +59,7 @@ export function useRoomService() {
        }
      }
      receiveMessage(socketMessage);
-     console.log(router)
+    //  console.log(router)
      router.push('/room');
    })
    if(sub){
@@ -102,7 +104,19 @@ export function useRoomService() {
       });
     }
 
-    emit('roomEvent', message);
+    //调用父组件方法，需要传的值
+    eventBus.emit("roomEvent",message);
+    // emit('roomEvent', message);
+    // const instance = getCurrentInstance();
+    // if(instance){
+    //   const { proxy } = instance;
+    //   console.log(proxy)
+    //   if (proxy && typeof proxy.roomEvent === 'function') {
+    //     proxy.roomEvent(message);
+    //   }else {
+    //     console.error('Vue instance not found');
+    //   }
+    // }
   };
 
   const isJoined = () => {

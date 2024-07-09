@@ -27,6 +27,7 @@ export interface LobbyService {
 
 
 export function useLobbyService():LobbyService {
+   //调用父组件方法，需要定义方法
   const emit = defineEmits(['lobbyEvent']);
   const roomListSubject: BehaviorSubject<Room[]>  = new BehaviorSubject([] as any);
   const creatingRoomSubject:BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -114,6 +115,7 @@ export function useLobbyService():LobbyService {
       const messageBody: LobbyRoomCreatedDto = message.body;
       setRoomListSubject(roomListSubject.value.filter(room => room.id !== messageBody.room.id)); 
     }
+     //调用父组件方法，需要传的值
     emit("lobbyEvent",message);
   }
 

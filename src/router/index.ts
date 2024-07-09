@@ -1,15 +1,21 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import Lobby from '../views/lobby/join_lobby.vue'
+
 import Room from '../views/room/room/AppRoom.vue'
 import GameBoard from '../views/game-board/GameBoard.vue'
 import Lobby_Nav from '../views/lobby/lobby_nav.vue'
 import LobbyPage from '../views/lobby/lobby-page/LobbyPage.vue'
 import Create_Room from '../views/lobby/create_room.vue'
+import Test from '../views/Test.vue'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'lobby',
     component: LobbyPage
+  },
+  {
+    path: '/test',
+    name: 'test',
+    component: Test
   },
   {
     path: '/lobby_nav',

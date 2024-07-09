@@ -35,7 +35,7 @@
         </el-button>
       </el-tooltip>
     </div>
-<!--    <GameBoard id="gameBoard" ref="gameBoard"></GameBoard>-->
+   <GameBoard id="gameBoard" ref="gameBoard"></GameBoard>
   </div>
 </template>
 
@@ -46,13 +46,14 @@ import { Room } from '@/shared/models/roomModel';
 import { Subscription } from 'rxjs';
 import { useRoomStore } from '@/api/room/roomStore';
 import { set } from 'lodash-es';
-// import GameBoard from '@/components/GameBoard.vue';
+import GameBoard from '@/views/game-board/GameBoard.vue';
 const room = ref<Room>();
 let subscriptions: Subscription[] = [];
 const roomService = useRoomStore();
 const setRoom= (data: Room) => {
     room.value = data;
 }
+const gameBoard = ref();
 onMounted(() => {
   subscriptions.push(
     // roomService.roomEvent.subscribe((message: SocketMessage) => this.roomEvent(message))
@@ -73,10 +74,10 @@ onUnmounted(() => {
 })
 
 const zoomIn = ():void=>{
-    // gameBoard.zoom(-250);
+    gameBoard.value.zoom(-250);
   }
 const zoomOut= ():void => {
-    // gameBoard.zoom(250);
+    gameBoard.value.zoom(250);
   }
 
 </script>

@@ -35,6 +35,7 @@ onMounted(()=>{
     lobbyService.creatingRoomSubject.subscribe((flag: boolean) => {
         creatingRoom.value = flag;
       }),
+      //TODO: 从子组件来的东西
       // lobbyService.lobbyEvent.subscribe((message: SocketMessage) => this.lobbyEvent(message)),
     lobbyService.roomListSubject.subscribe((roomList: Room[]) => {
         rooms.value = roomList;

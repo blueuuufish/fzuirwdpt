@@ -1,173 +1,267 @@
-<!-- <template>
-  <div class="align-center" ref="pixiContainer" id="pixiContainer"></div>
+<template>
+  <div class="align-center"
+       ref="pixiContainer"
+       id="pixiContainer"></div>
 </template>
 
-<script lang="ts">
-import { ref, onMounted, onBeforeUnmount,defineComponent, getCurrentInstance } from 'vue';
-import { Application, Assets, Container, Sprite, Texture } from 'pixi.js';
-import { Viewport } from 'pixi-viewport';
+<script setup lang="ts">
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  defineComponent,
+  getCurrentInstance,
+} from 'vue'
+import { Application, Assets, Container, Sprite, Texture } from 'pixi.js'
+import { Viewport } from 'pixi-viewport'
 // import PuzzlePieceSprite from './PuzzlePieceSprite.vue';
+import PuzzlePieceSprite from './PuzzlePieceSprite'
 import { PuzzlePiece } from '@/shared/models/puzzlePieceModel'
 import { Puzzle } from '@/shared/models/puzzleModel'
 import { RoomUser } from '@/shared/models/roomUserModel'
-// TODO: 修改 import { GameBoardComponent } from '../game-board/game-board.component';
-import { PuzzlePieceSprite } from './PuzzelePieceSprite'
-import {usePixiBoard} from './pixiBoard'
+import {useRoomStore} from '@/api/room/roomStore';
+const pixiContainer = ref<HTMLElement | null>(null);
+// let pixiApp
+// let pixiViewport
+// let puzzleTexture
+// let puzzlePieces = []
+// let pieceMap = new Map()
+// let puzzle
+// let activePuzzlePiece = null
 
+let pixiApp: Application;
+let pixiViewport: Viewport;
+const worldWidth = 2000
+const worldHeight = 1500
+let puzzleTexture: Texture;
+const pieceContainer = new Container()
+let puzzlePieces: PuzzlePieceSprite[][] = [];
+let pieceMap: Map<number, PuzzlePieceSprite[]> = new Map();
+let puzzle: Puzzle;
+let activePuzzlePiece: PuzzlePieceSprite | null = null;
+const pixiBoard = ref();
+const initPixi = () => {
+  pixiApp = new Application({
+    antialias: true,
+    backgroundAlpha: 0,
+    resolution: 1,
+    //TODO: hostRef.nativeElement  hostRef: ElementRef 是什么？？
+    resizeTo: pixiBoard.value
+  })
 
-// TODO: 检查逻辑是否一致
-export default defineComponent({
-  name: 'PixiBoard',
-  props: {},
-  setup() {
-    // const pixiContainer = ref<HTMLDivElement | null>(null);
-    // const pixiApp = ref<Application | null>(null);
-    // const pixiViewport = ref<Viewport | null>(null);
-    // const pieceContainer = ref(new Container());
-    // //TODO: const pieceMap = ref(new Map<number, typeof PuzzlePieceSprite[]>());PuzzlePieceSprite' refers to a value, but is being used as a type here. Did you mean 'typeof PuzzlePieceSprite'?Vetur(2749)
-    // const puzzlePieces = ref<typeof PuzzlePieceSprite[][]>([]);
-    // const pieceMap = ref(new Map<number, typeof PuzzlePieceSprite[]>());
-    // const worldWidth = 2000;
-    // const worldHeight = 1500;
-    // const puzzleTexture = ref<Texture | null>(null);
-    // const puzzle = ref<Puzzle | null>(null);
-    // const activePuzzlePiece = ref<typeof PuzzlePieceSprite | null>(null);
-    const {pixiContainer,pixiApp,pixiViewport,pieceContainer,puzzlePieces,pieceMap,worldWidth,worldHeight,puzzleTexture,puzzle,activePuzzlePiece,onDragMove } = usePixiBoard()
+  pixiViewport = new Viewport({
+    screenWidth: window.innerWidth,
+    screenHeight: window.innerHeight,
+    worldWidth: worldWidth,
+    worldHeight: worldHeight,
+    events: pixiApp.renderer.events,
+  })
 
-    onMounted(() => {
-      if (pixiContainer.value) {
-        pixiApp.value = new Application({
-          antialias: true,
-          backgroundAlpha: 0,
-          resolution: 1,
-          resizeTo: pixiContainer.value,
-        });
-        pixiViewport.value = new Viewport({
-          screenWidth: window.innerWidth,
-          screenHeight: window.innerHeight,
-          worldWidth: worldWidth,
-          worldHeight: worldHeight,
-          events: pixiApp.value.renderer.events
-        });
+  pixiApp.stage.addChild(pixiViewport)
+  pixiViewport.drag().pinch().wheel().decelerate()
 
-        pixiApp.value.stage.addChild(pixiViewport.value);
-        pixiViewport.value
-          .drag()
-          .pinch()
-          .wheel()
-          .decelerate();
-
-        pieceContainer.value.sortableChildren = true;
-        pieceContainer.value.eventMode = 'static'
-        pieceContainer.value.on('pointermove', (e: any) => onDragMove(e));
-
-        pixiContainer.value.appendChild(pixiApp.value.view);
+  pieceContainer.sortableChildren = true
+  pieceContainer.eventMode = 'static'
+  pieceContainer.on('globalpointermove', (e) => onDragMove(e))
+};
+const roomService = useRoomStore();
+const dragPieceToWS = (idX: number, idY: number, position: number[]) => {
+  roomService.sendMovePuzzlePiece({ idX, idY, position, group: 0 });
+};
+const releasePieceToWS = (idX: number, idY: number, position: number[]) => {
+  roomService.sendReleasePuzzlePiece({ idX, idY, position, group: 0 });
+};
+onMounted(() => {
+  initPixi()
+  //Property 'value' may not exist on type 'number'. Did you mean 'valueOf'?
+  if (pixiContainer.value) {
+    pixiContainer.value.appendChild(pixiApp.view)
+  }
+})
+const onDragMove = (event:any) => {
+      console.log('dragmove');
+      if (activePuzzlePiece != null) {
+        activePuzzlePiece.onDragMove(event);
       }
-    });
-
-    const init = (puzzleData: Puzzle) => {
-      reset();
-
-      puzzle.value = puzzleData;
-      setWorldSize(puzzleData.worldSize[0], puzzleData.worldSize[1]);
-
-      Texture.fromURL(puzzleData.imageBase64).then((texture) => {
-        puzzleTexture.value = texture;
-        const bgSprite = new Sprite(texture);
-        bgSprite.width = puzzleData.imageSize[0];
-        bgSprite.height = puzzleData.imageSize[1];
-        bgSprite.alpha = 0.5;
-
-        const bgOffsetX = puzzleData.pieceSize[0] * PuzzlePieceSprite.SHAPE_OFFSET;
-        const bgOffsetY = puzzleData.pieceSize[1] * PuzzlePieceSprite.SHAPE_OFFSET;
-        bgSprite.position.set(worldWidth / 2 - bgSprite.width / 2 - bgOffsetX, worldHeight / 2 - bgSprite.height / 2 - bgOffsetY);
-
-        pixiViewport.value?.addChild(bgSprite);
-        pixiViewport.value?.addChild(pieceContainer.value);
-        pixiViewport.value?.moveCenter(bgSprite.position.x + bgSprite.width / 2, bgSprite.position.y + bgSprite.height / 2);
-
-        createPieces(puzzleData.pieceSize, puzzleData.piecesDimensions, puzzleData.puzzlePieces);
-        pixiApp.value?.resize();
-      });
     };
+const setWorldSize = (worldWidth: number, worldHeight: number) => {
+  pixiViewport.resize(worldWidth, worldHeight);
+  pixiViewport.clamp({ direction: 'all' });
+  pixiViewport.clampZoom({
+    minWidth: pixiViewport.screenWidth / 3,
+    minHeight: pixiViewport.screenHeight / 3,
+    maxWidth: pixiViewport.worldWidth,
+    maxHeight: pixiViewport.worldHeight,
+  });
+  pixiViewport.setZoom(0.01, true);
+};
 
-    const reset = () => {
-      pieceMap.value.clear();
-      puzzlePieces.value = [];
-      pixiViewport.value?.removeChildren();
-      pieceContainer.value.removeChildren();
-    };
+const init = (puzzleData: Puzzle) => {
+  reset();
 
-    const setWorldSize = (worldWidth: number, worldHeight: number) => {
-      pixiViewport.value?.resize(worldWidth, worldHeight);
-      pixiViewport.value?.clamp({ direction: 'all' });
-      pixiViewport.value?.clampZoom({
-        minWidth: pixiViewport.value.screenWidth / 3,
-        minHeight: pixiViewport.value.screenHeight / 3,
-        maxWidth: pixiViewport.value.worldWidth,
-        maxHeight: pixiViewport.value.worldHeight,
-      });
-      pixiViewport.value?.setZoom(0.01, true);
-    };
+  puzzle = puzzleData;
+  setWorldSize(puzzleData.worldSize[0], puzzleData.worldSize[1]);
 
-    const createPieces = (pieceSize: number[], piecesDimensions: number[], pieces: PuzzlePiece[]) => {
-      const scaleX = puzzle.value?.imageSize[0] / (puzzleTexture.value?.width ?? 1);
-      const scaleY = puzzle.value?.imageSize[1] / (puzzleTexture.value?.height ?? 1);
+  Texture.fromURL(puzzleData.imageBase64).then((texture) => {
+    puzzleTexture = texture;
+    const bgSprite = new Sprite(texture);
+    bgSprite.width = puzzleData.imageSize[0];
+    bgSprite.height = puzzleData.imageSize[1];
+    bgSprite.alpha = 0.5;
 
-      const pieceWidth = pieceSize[0];
-      const pieceHeight = pieceSize[1];
-      const piecesX = piecesDimensions[0];
-      const piecesY = piecesDimensions[1];
+    const bgOffsetX = puzzleData.pieceSize[0] * PuzzlePieceSprite.SHAPE_OFFSET;
+    const bgOffsetY = puzzleData.pieceSize[1] * PuzzlePieceSprite.SHAPE_OFFSET;
+    bgSprite.position.set(worldWidth / 2 - bgSprite.width / 2 - bgOffsetX, worldHeight / 2 - bgSprite.height / 2 - bgOffsetY);
 
-      puzzlePieces.value = new Array(piecesX).fill(undefined).map(() => new Array(piecesY).fill(undefined));
+    pixiViewport.addChild(bgSprite);
+    pixiViewport.addChild(pieceContainer.value);
+    pixiViewport.moveCenter(bgSprite.position.x + bgSprite.width / 2, bgSprite.position.y + bgSprite.height / 2);
 
-      const { ctx } = getCurrentInstance() as any
-      const _this = ctx      
+    createPieces(puzzleData.pieceSize, puzzleData.piecesDimensions, puzzleData.puzzlePieces);
+    pixiApp.resize();
+  });
+};
+const reset = () => {
+  pieceMap.clear();
+  puzzlePieces = [];
+  pixiViewport.removeChildren();
+  pieceContainer.removeChildren();
+};
+const createPieces = (pieceSize: number[], piecesDimensions: number[], pieces: PuzzlePiece[]) => {
+  const scaleX = puzzle.imageSize[0] / (puzzleTexture.width ?? 1);
+  const scaleY = puzzle.imageSize[1] / (puzzleTexture.height ?? 1);
 
-      for (let i = 0; i < piecesY; i++) {
-        for (let j = 0; j < piecesX; j++) {
-          const piece = pieces[i * piecesX + j];
-          const pieceSprite = new PuzzlePieceSprite(_this, puzzleTexture.value!, pieceWidth, pieceHeight, j, i, scaleX, scaleY, piecesDimensions);
-          pieceSprite.setPosition(piece.position[0], piece.position[1]);
-          setGroup(pieceSprite, piece.group);
+  const pieceWidth = pieceSize[0];
+  const pieceHeight = pieceSize[1];
+  const piecesX = piecesDimensions[0];
+  const piecesY = piecesDimensions[1];
 
-          if (piece.group === -9999) {
-            pieceSprite.setCompleted(true);
-          }
+  puzzlePieces = new Array(piecesX).fill(undefined).map(() => new Array(piecesY).fill(undefined));
 
-          puzzlePieces.value[j][i] = pieceSprite;
-          pieceContainer.value.addChild(pieceSprite);
+
+  for (let i = 0; i < piecesY; i++) {
+    for (let j = 0; j < piecesX; j++) {
+      const piece = pieces[i * piecesX + j];
+      const pieceSprite = new PuzzlePieceSprite(pixiContainer.value, puzzleTexture!, pieceWidth, pieceHeight, j, i, scaleX, scaleY, piecesDimensions);
+      pieceSprite.setPosition(piece.position[0], piece.position[1]);
+      setGroup(pieceSprite, piece.group);
+
+      if (piece.group === -9999) {
+        pieceSprite.setCompleted(true);
+      }
+
+      puzzlePieces[j][i] = pieceSprite;
+      pieceContainer.addChild(pieceSprite);
+    }
+  }
+};
+const setGroup = (pieceSprite: PuzzlePieceSprite, group: number) => {
+  if (pieceSprite.group !== group && pieceMap.has(pieceSprite.group)) {
+    pieceMap.set(pieceSprite.group, pieceMap.get(pieceSprite.group)!.filter((ps) => ps !== pieceSprite));
+  }
+
+  pieceSprite.setGroup(group);
+
+  if (pieceMap.has(group)) {
+    pieceMap.set(group, [...(pieceMap.get(group) ?? []), pieceSprite]);
+  } else {
+    pieceMap.set(group, [pieceSprite]);
+  }
+};
+const dragPieceSprite = (pieceSprite: PuzzlePieceSprite) => {
+    dragPieceToWS(pieceSprite.idX, pieceSprite.idY, [pieceSprite.position.x, pieceSprite.position.y]);
+    stopPanning();
+
+    movePieceGroup(pieceSprite);
+};
+
+const releasePieceSprite = (pieceSprite: PuzzlePieceSprite) => {
+    releasePieceToWS(pieceSprite.idX, pieceSprite.idY, [pieceSprite.position.x, pieceSprite.position.y]);
+    startPanning();
+};
+const movePiece = (user: RoomUser, piece: PuzzlePiece) => {
+    const pieceSprite: PuzzlePieceSprite = puzzlePieces[piece.idX][piece.idY];
+
+    pieceSprite.setPosition(piece.position[0], piece.position[1]);
+    pieceSprite.setInteractedUser(user);
+
+    movePieceGroup(pieceSprite);
+};
+const getRealX = (idX: number): number => {
+    return puzzle.worldSize[0]/2.- puzzle.imageSize[0]/2.-puzzle.pieceSize[0]/4.+idX*puzzle.pieceSize[0];
+}
+
+const getRealY = (idY: number): number => {
+    return puzzle.worldSize[1]/2.- puzzle.imageSize[1]/2.-puzzle.pieceSize[1]/4.+idY*puzzle.pieceSize[1];
+}
+const movePieceGroup = (keyPieceSprite: PuzzlePieceSprite) => {
+    if(pieceMap.has(keyPieceSprite.group)){
+      for(let ps of pieceMap.get(keyPieceSprite.group)!) {
+
+        if(ps !== keyPieceSprite){
+          const newX = keyPieceSprite.x + getRealX(ps.idX) - getRealX(keyPieceSprite.idX);
+          const newY = keyPieceSprite.y + getRealY(ps.idY) - getRealY(keyPieceSprite.idY);
+
+          ps.setPosition(newX, newY);
         }
       }
-    };
+    }
+  };
+  const releasePiece = (piece: PuzzlePiece, changedPieces: PuzzlePiece[] = []) => {
+    const pieceSprite: PuzzlePieceSprite = puzzlePieces[piece.idX][piece.idY];
 
-    const setGroup = (pieceSprite: PuzzlePieceSprite, group: number) => {
-      if (pieceSprite.group !== group && pieceMap.value.has(pieceSprite.group)) {
-        pieceMap.value.set(pieceSprite.group, pieceMap.value.get(pieceSprite.group)!.filter((ps) => ps !== pieceSprite));
+    setGroup(pieceSprite, piece.group);
+    pieceSprite.setPosition(piece.position[0], piece.position[1]);
+    pieceSprite.setInteractedUser(null);
+    if(piece.group === -9999) {
+      pieceSprite.setCompleted(true);
+    }
+
+    for(let i = 0; i < changedPieces.length; i++) {
+      const p = changedPieces[i];
+      const pSprite = puzzlePieces[p.idX][p.idY];
+      setGroup(pSprite, piece.group);
+
+      if(piece.group === -9999) {
+        pSprite.setCompleted(true);
       }
+    }
+    movePieceGroup(pieceSprite);
+  };
 
-      pieceSprite.setGroup(group);
-
-      if (pieceMap.value.has(group)) {
-        pieceMap.value.set(group, [...(pieceMap.value.get(group) ?? []), pieceSprite]);
-      } else {
-        pieceMap.value.set(group, [pieceSprite]);
+  const removeInteractionFromPieces = (user: RoomUser) => {
+    for(let i = 0; i < puzzlePieces.length; i++) {
+      for(let j = 0; j < puzzlePieces[0].length; j++) {
+        const pieceSprite = puzzlePieces[i][j];
+        if(pieceSprite.getInteractedUser()?.username == user.username){
+          pieceSprite.setInteractedUser(null);
+        }
       }
-    };
-
-    const onDragMove = (event: any) => {
-      if (activePuzzlePiece.value) {
-        activePuzzlePiece.value.onDragMove(event);
-      }
-    };
-
-    return {
-      pixiContainer,
-      init,
-      setGroup,
-    };
-  },
-});
+    }
+  };
+  const stopPanning = ():void =>{
+    pixiViewport.plugins.pause('drag');
+  }
+  const startPanning = ():void => {
+    pixiViewport.plugins.resume('drag');
+  }
+  const zoom = (strength: number) => {
+    pixiViewport.zoom(strength, true);
+  }
+  const setActivePuzzlePiece = (piece: PuzzlePieceSprite | null) => {
+    activePuzzlePiece = piece;
+  }
+  const getPuzzlePiece = (x: number, y: number) => {
+    if(x < 0 || y < 0 || x >= puzzlePieces.length || y >= puzzlePieces[0].length)
+      return null;
+    return puzzlePieces[x][y];
+  }
+  defineExpose({
+    removeInteractionFromPieces,
+    init,
+    releasePiece,
+    movePiece
+  });
 </script>
 
 <style scoped>
@@ -176,4 +270,4 @@ export default defineComponent({
   width: 100%;
   height: 100%;
 }
-</style> -->
+</style>

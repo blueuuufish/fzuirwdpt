@@ -83,5 +83,12 @@ export const useSocketStore = defineStore('socket', {
         console.error('Client not initialized');
       }
     },
+    getUsername(): string | undefined {
+      if (this.client) {
+        return this.client.getUsername();
+      } else {
+        console.error('Client not initialized');
+      }
+    },
   },
 });
