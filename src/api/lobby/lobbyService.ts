@@ -12,8 +12,8 @@ import { ref, onUnmounted, defineEmits} from 'vue';
 import request from "@/utils/request";
 import { environment } from "@/environments/environment";
 import { AxiosResponse } from "axios";
-import { useServiceStore } from '@/store/service';
 import { useSocketStore } from "../ws/socketStore";
+import { useRoomStore } from "../room/roomStore";
 // import {http} from '@/utils/http';
 export interface LobbyService {
   join(initialDataCallback: Function): void;
@@ -32,7 +32,7 @@ export function useLobbyService():LobbyService {
   const creatingRoomSubject:BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   // const socketGameService = useSocketGameService();
   const socketGameService = useSocketStore();
-  const roomService = useRoomService();
+  const roomService = useRoomStore();
   const stompSubscriptions = ref<StompSubscription[]>([]);
   const join = (initialDataCallback: Function) => {
     const stompSubscription = socketGameService.subscribe(SocketDestinations.Lobby,(message: IMessage)=>{

@@ -4,7 +4,7 @@
 
 <script>
 import { defineComponent, ref } from 'vue';
-import RoomComponent from '@/components/RoomComponent.vue';
+import RoomComponent from './room.vue';
 
 export default defineComponent({
   components: {

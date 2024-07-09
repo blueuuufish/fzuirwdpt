@@ -18,14 +18,19 @@ import {ref,onMounted, onUnmounted} from 'vue'
 import {useLobbyStore} from '@/api/lobby/lobbyStore'
 import LobbyNav from './LobbyNav.vue'
 import CreateRoom from './CreateRoom.vue'
+import LobbyRoomBlock from './LobbyRoomBlock.vue'
+import {LobbyInitialDataDto} from '@/shared/models/dto/lobbyInitDataDto'
 
 
 const creatingRoom = ref(false);
 const rooms = ref<Room[]>([]);
 let subscriptions: Subscription[]= [];
 const lobbyService = useLobbyStore();
+const loadInitialData= (initialData: LobbyInitialDataDto) =>{
+    // this.rooms = of(initialData.rooms);
+  }
 onMounted(()=>{
-  // lobbyService.join()
+  lobbyService.join((message: any) => loadInitialData(message))
   subscriptions.push(
     lobbyService.creatingRoomSubject.subscribe((flag: boolean) => {
         creatingRoom.value = flag;
@@ -33,6 +38,7 @@ onMounted(()=>{
       // lobbyService.lobbyEvent.subscribe((message: SocketMessage) => this.lobbyEvent(message)),
     lobbyService.roomListSubject.subscribe((roomList: Room[]) => {
         rooms.value = roomList;
+        console.log(roomList)
       })
   );
 })

@@ -29,8 +29,7 @@ import {useSocketStore} from '@/api/ws/socketStore'
 const playerName = ref('');
 const playerNameTouched = ref(false);
 const socketStore = useSocketStore();
-socketStore.initializeClient();
-console.log('初始化WebSocket client...');
+
 
 const isValidPlayerName = computed(() => {
   return playerName.value.length >= 4;

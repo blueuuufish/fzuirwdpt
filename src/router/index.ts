@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import Lobby from '../views/lobby/join_lobby.vue'
-import Room from '../views/room/room.vue'
+import Room from '../views/room/test_room.vue'
 import GameBoard from '../views/game-board/GameBoard.vue'
 import Lobby_Nav from '../views/lobby/lobby_nav.vue'
 import LobbyPage from '../views/lobby/lobby-page/LobbyPage.vue'

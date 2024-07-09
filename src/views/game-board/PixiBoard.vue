@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="align-center" ref="pixiContainer" id="pixiContainer"></div>
 </template>
 
@@ -176,4 +176,4 @@ export default defineComponent({
   width: 100%;
   height: 100%;
 }
-</style>
+</style> -->

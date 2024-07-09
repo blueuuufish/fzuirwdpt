@@ -14,6 +14,15 @@ import { RoomUserLeftDto } from '@/shared/models/dto/roomUserLeftDto';
 import { useSocketStore } from '../ws/socketStore';
 import { RoomInitialDataDto } from '@/shared/models/dto/roomInitialDataDto';
 
+export interface RoomService {
+  roomSubject: BehaviorSubject<Room>;
+  join(id: string, initialDataCallback: Function | null):void;
+  detach():void;
+  isJoined(): boolean;
+  sendMovePuzzlePiece(puzzlePiece: PuzzlePiece):void;
+  sendReleasePuzzlePiece(puzzlePiece: PuzzlePiece):void;
+  getUserByUsername(username: string): RoomUser | undefined;
+}
 
 export function useRoomService() {
   const emit = defineEmits(['roomEvent']);
@@ -48,6 +57,7 @@ export function useRoomService() {
        }
      }
      receiveMessage(socketMessage);
+     console.log(router)
      router.push('/room');
    })
    if(sub){
@@ -55,39 +65,7 @@ export function useRoomService() {
    }
 
   }
-  // const join = async (id: string, initialDataCallback: Function | null = null) => {
-  //   try {
-  //     await socketGameService.connectClient('playerName');
-  //     // 连接成功后订阅公共频道
-  //     socketGameService.subscribe('/topic/all', (message) => {
-  //       const body = JSON.parse(message.body);
-  //       console.log('Message from server: ', body.message);
-  //       // 处理接收到的 "hello world" 消息
-  //     });
-
-  //     // 连接成功后进行房间订阅
-  //     stompSubscription.value = socketGameService.subscribe(
-  //       `/QAQ${SocketDestinations.Room}/${id}`,
-  //       (message: IMessage) => {
-  //         const socketMessage = JSON.parse(message.body);
-  //         if (socketMessage.event === SocketEventType.Room_InitialData) {
-  //           const socketMessageBody = socketMessage.body;
-  //           socketMessageBody.room.users = socketMessageBody.room.users || [];
-  //           roomSubject.next(socketMessageBody.room);
-  //           if (initialDataCallback) {
-  //             initialDataCallback(socketMessageBody);
-  //           }
-  //         } else {
-  //           emit('roomEvent', socketMessage);
-  //         }
-  //       }
-  //     );
-  //   } catch (error) {
-  //     console.error("Failed to join room: ", error);
-  //   }
-  // };
-
-
+  
   const setRoomSubject = (room: Room) => {
     roomSubject.next(room);
     console.log('save room');

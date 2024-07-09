@@ -1,11 +1,13 @@
 <template>
   <v-toolbar class="navbar">
-    <v-btn @click="clickOnBackBtn"> Back </v-btn>
+    <el-button type="info" round @click="clickOnBackBtn">Back</el-button>
+
     <span class="spacer"></span>
     <div id="username-panel">
       {{ socketGameData?.username }}
     </div>
-    <v-btn @click="clickOnCreateRoomBtn"> Create Room </v-btn>
+    <el-button type="info" round @click="clickOnCreateRoomBtn">Create Room</el-button>
+
   </v-toolbar>
 </template>
 

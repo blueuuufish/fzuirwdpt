@@ -1,14 +1,19 @@
 export default function convertImageToBase64(
   image: File,
-  callback: (result: string | null) => void,
+  callback: (result: string) => void,
   errorCallback: (error: string) => void
 ): void {
   const reader = new FileReader();
   reader.readAsDataURL(image);
 
   reader.onload = () => {
-    callback(reader.result?.toString() || null);
+    if (reader.result) {
+      callback(reader.result.toString());
+    } else {
+      errorCallback("File conversion failed.");
+    }
   };
+
   reader.onerror = () => {
     errorCallback("File conversion failed.");
   };

@@ -1,4 +1,28 @@
-<template>
+<template lang="">
+  <div id="pixiBoard">
+    <div class="align-center" id="pixiContainer" #pixiContainer></div>
+  </div>
+</template>
+<script>
+
+</script>
+<style lang="">
+/* :host {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+} */
+
+#pixiBoard {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+</style>
+
+<!-- <template>
   <div></div>
 </template>
 <template>
@@ -109,4 +133,4 @@ export default defineComponent({
   margin: 0;
   padding: 0;
 }
-</style>
+</style> -->
