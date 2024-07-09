@@ -14,7 +14,7 @@
             <ul>
               <li v-for="user in room.users" :key="user.id" class="user-item">
                 <div :style="{ color: user.getColor() }">
-                  {{ user.username }} ({{ user.id }})
+                  {{ user.username }} 
                 </div>
               </li>
             </ul>
@@ -39,41 +39,46 @@
   </div>
 </template>
 
-<script>
-import { ref } from 'vue';
+<script setup lang='ts'>
+import { onMounted, onUnmounted, ref } from 'vue';
 import { ZoomIn, ZoomOut } from '@element-plus/icons-vue'; // 引入图标
+import { Room } from '@/shared/models/roomModel';
+import { Subscription } from 'rxjs';
+import { useRoomStore } from '@/api/room/roomStore';
+import { set } from 'lodash-es';
 // import GameBoard from '@/components/GameBoard.vue';
-
-export default {
-  name: 'RoomComponent',
-  components: {
-    // GameBoard,
-    ZoomIn,
-    ZoomOut
-  },
-  props: {
-    room: {
-      type: Object,
-      required: true
+const room = ref<Room>();
+let subscriptions: Subscription[] = [];
+const roomService = useRoomStore();
+const setRoom= (data: Room) => {
+    room.value = data;
+}
+onMounted(() => {
+  subscriptions.push(
+    // roomService.roomEvent.subscribe((message: SocketMessage) => this.roomEvent(message))
+    roomService.roomSubject.subscribe(
+      room => {
+          setRoom(room);
+      }
+    )
+  );
+  setRoom(roomService.roomSubject.value);
+})
+onUnmounted(() => { 
+  for(let sub of subscriptions){
+      sub.unsubscribe();
     }
-  },
-  setup() {
-    // const gameBoard = ref(null);
-    const zoomIn = () => {
-      console.log('Zoom In');
-    };
+    subscriptions = [];
 
-    const zoomOut = () => {
-      console.log('Zoom Out');
-    };
+})
 
-    return {
-      // gameBoard,
-      zoomIn,
-      zoomOut
-    };
+const zoomIn = ():void=>{
+    // gameBoard.zoom(-250);
   }
-};
+const zoomOut= ():void => {
+    // gameBoard.zoom(250);
+  }
+
 </script>
 
 <style scoped>

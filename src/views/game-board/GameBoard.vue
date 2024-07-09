@@ -1,18 +1,89 @@
 <template lang="">
-  <div id="pixiBoard">
-    <div class="align-center" id="pixiContainer" #pixiContainer></div>
+  <div class="game-board">
+    <PixiBoardComponent ref="pixiBoard" id="pixiBoard"></PixiBoardComponent>
   </div>
-</template>
-<script>
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
+import {useRoomStore} from '@/api/room/roomStore'
+import { useSocketStore} from '@/api/ws/socketStore'
+/* import PixiBoardComponent from './PixiBoardComponent.vue'; */
+const pixiBoard = ref();
+const roomService = useRoomStore();
+const socketGameService = useSocketStore();
+let subscriptions = [];
+
+const init = (room) => {
+  //TODO: 调用pixiBoard的方法，需要pixiBoard导出 defineExpose
+  pixiBoard.value.init(room.puzzle);
+};
+
+const handleRoomEvent = (message) => {
+  if (message.event === 'Room_Puzzle_Move') {
+    const body = message.body;
+    puzzleMoveEvent(body);
+  } else if (message.event === 'Room_Puzzle_Release') {
+    const body = message.body;
+    puzzleReleaseEvent(body);
+  } else if (message.event === 'Room_UserLeft') {
+    const body = message.body;
+    pixiBoard.value.removeInteractionFromPieces(body.user);
+  }
+};
+
+const puzzleMoveEvent = (roomPuzzleMove) => {
+  if (roomPuzzleMove.username === socketGameService.getUsername()) return;
+
+  const user = roomService.getUserByUsername(roomPuzzleMove.username);
+  if (!user) return;
+
+  pixiBoard.value.movePiece(user, roomPuzzleMove.puzzlePiece);
+};
+
+const puzzleReleaseEvent = (roomPuzzleRelease) => {
+  pixiBoard.value.releasePiece(roomPuzzleRelease.puzzlePiece, roomPuzzleRelease.changedPieces);
+};
+
+const dragPiece = (idX, idY, position) => {
+  roomService.sendMovePuzzlePiece({ idX, idY, position, group: 0 });
+};
+
+const releasePiece = (idX, idY, position) => {
+  roomService.sendReleasePuzzlePiece({ idX, idY, position, group: 0 });
+};
+
+const zoom = (strength) => {
+  pixiBoard.value.zoom(strength);
+};
+
+onMounted(() => {
+  subscriptions.push(
+    roomService.roomSubject.subscribe((room) => {
+      if (room.id) {
+        init(room);
+        subscriptions[0].unsubscribe();
+      }
+    }),
+    //TODO: 取emit事件，能否这样用？
+    roomService.roomEvent.subscribe((message) => handleRoomEvent(message))
+  );
+  if (roomService.roomSubject.value.id) {
+    init(roomService.roomSubject.value);
+  }
+});
+
+onUnmounted(() => {
+  subscriptions.forEach((sub) => sub.unsubscribe());
+  subscriptions = [];
+});
 
 </script>
-<style lang="">
-/* :host {
+<style lang="" >
+.game-board {
   height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
-} */
+}
 
 #pixiBoard {
   width: 100%;
