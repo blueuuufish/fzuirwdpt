@@ -82,7 +82,7 @@ const zoomOut= ():void => {
 
 </script>
 
-<style>
+<style scoped>
 .room-container {
   display: flex;
   flex-direction: column;
@@ -171,4 +171,5 @@ const zoomOut= ():void => {
   color: #fff;
 }
 
+/* 添加任何其他需要的样式 */
 </style>

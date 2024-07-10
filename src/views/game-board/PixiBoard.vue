@@ -69,8 +69,6 @@ const initPixi = () => {
     //TODO: hostRef.nativeElement  hostRef: ElementRef 是什么？？
     resizeTo: proxy.$refs.pixiContainer
   })
-  console.log(window.innerWidth)
-  console.log(window.innerHeight)
   pixiViewport = new Viewport({
     screenWidth: window.innerWidth,
     screenHeight: window.innerHeight,
@@ -98,14 +96,14 @@ onMounted(() => {
   // initPixi()
   //Property 'value' may not exist on type 'number'. Did you mean 'valueOf'?
   if (pixiContainer.value) {
-    console.log('sadasd')
+    // console.log('sadasd')
     pixiContainer.value.appendChild(pixiApp.view)
   }
 
   // console.log(proxy.$refs.pixiContainer)
 })
 const onDragMove = (event:any) => {
-      console.log('dragmove');
+      // console.log('dragmove');
       if (activePuzzlePiece != null) {
         activePuzzlePiece.onDragMove(event);
       }
@@ -124,26 +122,23 @@ const setWorldSize = (worldWidth: number, worldHeight: number) => {
 
 const init = (puzzleData: Puzzle,pixiBoard:ComponentInstance<typeof PixiBoard>) => {
   reset();
-  console.log('323',pixiBoard)
 
   puzzle = puzzleData;
   setWorldSize(puzzleData.worldSize[0], puzzleData.worldSize[1]);
  //Texture.fromURL(puzzleData.imageBase64)
- console.log(puzzleData.imageBase64)
 
   Assets.load(puzzleData.imageBase64).then((texture: Texture) => {
     puzzleTexture = texture;
-    
-
     const bgOffsetX = puzzleData.pieceSize[0] * PuzzlePieceSprite.SHAPE_OFFSET;
     const bgOffsetY = puzzleData.pieceSize[1] * PuzzlePieceSprite.SHAPE_OFFSET;
     const bgSprite = new Sprite(texture);
+    // const bgSprite1 = new Sprite(texture);
     console.log('7865',texture);
     bgSprite.width = puzzleData.imageSize[0];
     bgSprite.height = puzzleData.imageSize[1];
     bgSprite.alpha = 0.5;
     bgSprite.position.set(worldWidth / 2 - bgSprite.width / 2 - bgOffsetX, worldHeight / 2 - bgSprite.height / 2 - bgOffsetY);
-    console.log(bgSprite)
+    console.log("5678"+bgSprite)
     
     pixiViewport.addChild(bgSprite);
     console.log('2134', pixiViewport);
@@ -166,7 +161,6 @@ const reset = () => {
 };
 // const {proxy} = getCurrentInstance() 
 const createPieces = (pieceSize: number[], piecesDimensions: number[], pieces: PuzzlePiece[],pixiBoard:ComponentInstance<typeof PixiBoard>) => {
-  console.log('21321', pixiBoard)
   const scaleX = puzzle.imageSize[0] / (puzzleTexture.width ?? 1);
   const scaleY = puzzle.imageSize[1] / (puzzleTexture.height ?? 1);
 
@@ -306,11 +300,12 @@ const movePieceGroup = (keyPieceSprite: PuzzlePieceSprite) => {
     releasePieceSprite,
     setActivePuzzlePiece,
     dragPieceSprite,
-    movePiece
+    movePiece,
+    zoom
   });
 </script>
 
-<style>
+<style scoped>
 #pixiContainer {
   display: flex;
   width: 100%;

@@ -78,8 +78,8 @@ onMounted(() => {
         //   init(room,pixiBoard);
         // }, 100)
         init(room,pixiBoard);
-        console.log(subscriptions)
-        subscriptions[0].unsubscribe();
+        // console.log(subscriptions)
+        // subscriptions[0].unsubscribe();
       }
     }),
     //TODO: 取emit事件，能否这样用？
@@ -103,7 +103,7 @@ const gameBoardKey = Symbol('gameBoard')
 provide(gameBoardKey,{pixiBoard})
 
 </script>
-<style>
+<style scoped>
 .game-board {
   height: 100%;
   width: 100%;
@@ -114,7 +114,7 @@ provide(gameBoardKey,{pixiBoard})
 #pixiBoard {
   width: 100%;
   height: 100%;
-  margin: 0;
+  margin: 100px;
   padding: 0;
 }
 </style>
