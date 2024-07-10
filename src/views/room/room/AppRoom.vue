@@ -35,7 +35,7 @@
         </el-button>
       </el-tooltip>
     </div>
-   <GameBoard id="gameBoard" ref="gameBoard"></GameBoard>
+   <game-board id="gameBoard" ref="gameBoard"></game-board>
   </div>
 </template>
 
@@ -82,7 +82,7 @@ const zoomOut= ():void => {
 
 </script>
 
-<style scoped>
+<style>
 .room-container {
   display: flex;
   flex-direction: column;
@@ -171,5 +171,4 @@ const zoomOut= ():void => {
   color: #fff;
 }
 
-/* 添加任何其他需要的样式 */
 </style>

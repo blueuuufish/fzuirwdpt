@@ -1,5 +1,6 @@
 // eventBus.ts
 import { ref } from 'vue';
+import { Subscription } from 'rxjs';
 
 export const eventBus = {
   events: ref([] as any[]),
@@ -8,7 +9,7 @@ export const eventBus = {
     this.events.value.push({ event, payload });
   },
 
-  on(event: string, callback: (payload: any) => void) {
+  on(event: string, callback: (payload: any) => void){
     this.events.value.push({ event, callback });
   },
 

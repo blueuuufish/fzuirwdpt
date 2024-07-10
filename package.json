@@ -17,7 +17,7 @@
     "jwt-decode": "^4.0.0",
     "lodash-es": "^4.17.21",
     "pinia": "^2.1.7",
-    "pixi-viewport": "^5.0.3",
+    "pixi-viewport": "^5.0.2",
     "pixi.js": "^7.4.0",
     "rxjs": "^6.6.7",
     "sockjs-client": "^1.6.1",

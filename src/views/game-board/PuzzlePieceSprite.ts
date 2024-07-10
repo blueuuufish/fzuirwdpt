@@ -25,6 +25,7 @@ export class PuzzlePieceSprite extends Container {
   constructor(private pixiBoard: ComponentInstance<typeof PixiBoard>, puzzleTexture: Texture, tPieceWidth: number, tPieceHeight: number,
     tIdX: number, tIdY: number, scaleX: number, scaleY: number, piecesDimensions: number[]) {
     super();
+    console.log(pixiBoard)
 
     this.idX = tIdX;
     this.idY = tIdY;
