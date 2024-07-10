@@ -135,7 +135,7 @@ const onSubmit = () => {
 }
 </style> -->
 <template>
-  <MainPanel title='create room'>
+  <MainPanel title='创建房间'>
     <el-card class="box-card" shadow="hover">
       <template #header>
         <div class="header">

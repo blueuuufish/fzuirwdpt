@@ -1,5 +1,5 @@
 <template>
-  <MainPanel title="Join To Lobby">
+  <MainPanel title="加入大厅">
     <form @submit.prevent="onSubmit" class="main-container">
       <div class="form-field">
         <span class="icon">😊</span>
@@ -8,7 +8,7 @@
             type="text"
             id="playerName"
             name="playerName"
-            placeholder="Player Name"
+            placeholder="玩家名称"
             :class="{ 'is-invalid': playerNameTouched && !isValidPlayerName }"
             @blur="playerNameTouched = true"
         />
@@ -16,7 +16,7 @@
           Name should be at least <strong>4 characters long</strong>
         </div>
       </div>
-      <button type="submit" class="main-btn">Join</button>
+      <button type="submit" class="main-btn">加入</button>
     </form>
   </MainPanel>
 

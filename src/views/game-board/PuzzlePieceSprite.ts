@@ -23,7 +23,7 @@ export class PuzzlePieceSprite extends Container {
   public group: number = 0;
 
   constructor(private pixiBoard: ComponentInstance<typeof PixiBoard>, puzzleTexture: Texture, tPieceWidth: number, tPieceHeight: number,
-    tIdX: number, tIdY: number, scaleX: number, scaleY: number, piecesDimensions: number[]) {
+              tIdX: number, tIdY: number, scaleX: number, scaleY: number, piecesDimensions: number[]) {
     super();
     console.log(pixiBoard)
 
@@ -61,8 +61,8 @@ export class PuzzlePieceSprite extends Container {
     this.sprite.cacheAsBitmap = true;
     this.shadowFilter = new DropShadowFilter({pixelSize: 1, blur:1, alpha: 0.3});
     this.sprite.filters = [new BevelFilter(
-      {thickness: Math.max(tPieceWidth*0.0175,1), lightAlpha: 0.15, shadowAlpha: 0.3, lightColor: 0xF7EFDA, rotation: 45, shadowColor: 0x000000
-    })];
+        {thickness: Math.max(tPieceWidth*0.0175,1), lightAlpha: 0.15, shadowAlpha: 0.3, lightColor: 0xF7EFDA, rotation: 45, shadowColor: 0x000000
+        })];
     this.outlineFilter = new OutlineFilter(2, 0xFF0000);
 
     const shape = createShape(this.sprite.width/2, this.sprite.height/2, tPieceWidth, tPieceHeight, this.tabs, 0x3498db);
@@ -74,8 +74,8 @@ export class PuzzlePieceSprite extends Container {
 
     this.eventMode = "static";
     this.on('pointerdown', this.onDragStart)
-    .on('pointerup', this.onDragEnd)
-    .on('pointerupoutside', this.onDragEnd);
+        .on('pointerup', this.onDragEnd)
+        .on('pointerupoutside', this.onDragEnd);
   }
 
   public setPosition(x: number, y: number): void {

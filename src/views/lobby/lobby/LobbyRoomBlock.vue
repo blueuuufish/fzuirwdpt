@@ -10,7 +10,7 @@
       </div>
     </div>
     <div class="card-actions">
-      <el-button type="primary" @click="clickOnJoinBtn">Join</el-button>
+      <el-button type="primary" @click="clickOnJoinBtn">加入</el-button>
     </div>
   </el-card>
 </template>

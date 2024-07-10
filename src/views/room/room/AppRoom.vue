@@ -1,7 +1,7 @@
 <template>
   <div v-if="room && room.id" class="room-container">
     <el-card class="room-id-card">
-      <p>Room {{ room.id }}</p>
+      <p>房间序号 {{ room.id }}</p>
     </el-card>
 
     <div id="info-panel-container" class="unclickable">
@@ -9,7 +9,7 @@
         <div id="player-list">
           <el-card>
             <div slot="header" class="clearfix">
-              <span>Players</span>
+              <span>玩家</span>
             </div>
             <ul>
               <li v-for="user in room.users" :key="user.id" class="user-item">

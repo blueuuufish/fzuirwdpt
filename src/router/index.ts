@@ -2,9 +2,9 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
 import Room from '../views/room/room/AppRoom.vue'
 import GameBoard from '../views/game-board/GameBoard.vue'
-import Lobby_Nav from '../views/lobby/lobby_nav.vue'
+import Lobby_Nav from '../views/lobby/lobby/LobbyNav.vue'
 import LobbyPage from '../views/lobby/lobby-page/LobbyPage.vue'
-import Create_Room from '../views/lobby/create_room.vue'
+import Create_Room from '../views/lobby/lobby/CreateRoom.vue'
 import Test from '../views/Test.vue'
 const routes: Array<RouteRecordRaw> = [
   {
@@ -37,12 +37,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'lobbyPage',
     component: LobbyPage
   },
-  
-  // {
-  //   path: '/',
-  //   name: 'gameTest',
-  //   component: GameBoard
-  // },
+
+  {
+    path: '/ga',
+    name: 'gameTest',
+    component: GameBoard
+  },
   // {
   //   path: '/lobby_page',
   //   name: 'lobbypage',
