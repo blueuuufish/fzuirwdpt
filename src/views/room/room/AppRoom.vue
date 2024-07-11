@@ -1,4 +1,5 @@
 <template>
+  <!-- <game-board id="gameBoard" ref="gameBoard"></game-board> -->
   <div v-if="room && room.id" class="room-container">
     <el-card class="room-id-card">
       <p>Room {{ room.id }}</p>

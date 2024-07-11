@@ -14,7 +14,7 @@ onUnmounted(()=>{
 })
 </script>
 <style lang="">
-  :host {
+  /* :host {
   height: 100%;
   width: 100%;
   flex: 1;
@@ -27,5 +27,5 @@ onUnmounted(()=>{
   display: block;
   width: 100%;
   height: 100%;
-}
+} */
 </style>

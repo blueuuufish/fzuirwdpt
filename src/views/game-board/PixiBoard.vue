@@ -45,20 +45,6 @@ let puzzle: Puzzle;
 let activePuzzlePiece: PuzzlePieceSprite | null = null;
 // const pixiBoard = ref();
 const initPixi = () => {
-  // const {ctx} = getCurrentInstance();
-  // const instance=
-
-  // let {proxy}=instance
-  // console.log(instance)
-  // const {ctx} = instance;
-  // if (instance && instance.proxy.$parent) {
-  //   console.log('Parent instance:', instance.proxy.$parent);
-  // }
-  // 定义一个符号用于依赖注入
-  const gameBoardKey = Symbol('gameBoard');
-
-  // 注入父组件实例
-  const gameBoard = inject(gameBoardKey)
   // console.log(pixiBoard)
   const {proxy} = getCurrentInstance() 
 
@@ -109,7 +95,9 @@ const onDragMove = (event:any) => {
       }
     };
 const setWorldSize = (worldWidth: number, worldHeight: number) => {
-  pixiViewport.resize(worldWidth, worldHeight);
+  // pixiViewport.resize(worldWidth, worldHeight);
+  pixiViewport.worldWidth = worldWidth;
+  pixiViewport.worldHeight = worldHeight;
   pixiViewport.clamp({ direction: 'all' });
   pixiViewport.clampZoom({
     minWidth: pixiViewport.screenWidth / 3,
@@ -125,10 +113,11 @@ const init = (puzzleData: Puzzle,pixiBoard:ComponentInstance<typeof PixiBoard>) 
 
   puzzle = puzzleData;
   setWorldSize(puzzleData.worldSize[0], puzzleData.worldSize[1]);
+  console.log(puzzleData)
  //Texture.fromURL(puzzleData.imageBase64)
 
   Assets.load(puzzleData.imageBase64).then((texture: Texture) => {
-    puzzleTexture = texture;
+    // puzzleTexture = texture;
     const bgOffsetX = puzzleData.pieceSize[0] * PuzzlePieceSprite.SHAPE_OFFSET;
     const bgOffsetY = puzzleData.pieceSize[1] * PuzzlePieceSprite.SHAPE_OFFSET;
     const bgSprite = new Sprite(texture);
@@ -148,7 +137,7 @@ const init = (puzzleData: Puzzle,pixiBoard:ComponentInstance<typeof PixiBoard>) 
     pixiViewport.moveCenter(bgSprite.position.x + bgSprite.width / 2, bgSprite.position.y + bgSprite.height / 2);
     console.log('213', pixiViewport);
     
-
+    puzzleTexture = texture;
     createPieces(puzzleData.pieceSize, puzzleData.piecesDimensions, puzzleData.puzzlePieces,pixiBoard);
     pixiApp.resize();
   });
@@ -161,8 +150,8 @@ const reset = () => {
 };
 // const {proxy} = getCurrentInstance() 
 const createPieces = (pieceSize: number[], piecesDimensions: number[], pieces: PuzzlePiece[],pixiBoard:ComponentInstance<typeof PixiBoard>) => {
-  const scaleX = puzzle.imageSize[0] / (puzzleTexture.width ?? 1);
-  const scaleY = puzzle.imageSize[1] / (puzzleTexture.height ?? 1);
+  const scaleX = puzzle.imageSize[0] / puzzleTexture.width;
+  const scaleY = puzzle.imageSize[1] / puzzleTexture.height;
 
   const pieceWidth = pieceSize[0];
   const pieceHeight = pieceSize[1];
@@ -178,7 +167,7 @@ const createPieces = (pieceSize: number[], piecesDimensions: number[], pieces: P
   for (let i = 0; i < piecesY; i++) {
     for (let j = 0; j < piecesX; j++) {
       const piece = pieces[i * piecesX + j];
-      const pieceSprite = new PuzzlePieceSprite(pixiBoard, puzzleTexture!, pieceWidth, pieceHeight, j, i, scaleX, scaleY, piecesDimensions);
+      const pieceSprite = new PuzzlePieceSprite(pixiBoard, puzzleTexture, pieceWidth, pieceHeight, j, i, scaleX, scaleY, piecesDimensions);
       pieceSprite.setPosition(piece.position[0], piece.position[1]);
       setGroup(pieceSprite, piece.group);
 
@@ -199,7 +188,9 @@ const setGroup = (pieceSprite: PuzzlePieceSprite, group: number) => {
   pieceSprite.setGroup(group);
 
   if (pieceMap.has(group)) {
-    pieceMap.set(group, [...(pieceMap.get(group) ?? []), pieceSprite]);
+    if(!pieceMap.get(group)?.includes(pieceSprite)){
+      pieceMap.set(group, [...(pieceMap.get(group) ?? []), pieceSprite]);
+    }
   } else {
     pieceMap.set(group, [pieceSprite]);
   }

@@ -17,6 +17,7 @@ import { eventBus } from '@/api/common/eventBus';
 
 export interface RoomService {
   roomSubject: BehaviorSubject<Room>;
+  messageSubject: BehaviorSubject<Room>;
   join(id: string, initialDataCallback: Function | null):void;
   detach():void;
   isJoined(): boolean;
@@ -27,8 +28,9 @@ export interface RoomService {
 
 export function useRoomService() {
    //调用父组件方法，需要定义方法名
-  // const emit = defineEmits(['roomEvent']);
+  const emit = defineEmits(['roomEvent']);
   const roomSubject: BehaviorSubject<Room> = new BehaviorSubject({} as any);
+  const messageSubject: BehaviorSubject<Room> = new BehaviorSubject({} as any);
   const stompSubscription = ref<StompSubscription | null>(null);
 
   const router = useRouter();
@@ -105,6 +107,8 @@ export function useRoomService() {
     }
 
     //调用父组件方法，需要传的值
+    console.log("1")
+    console.log(message)
     eventBus.emit("roomEvent",message);
     // emit('roomEvent', message);
     // const instance = getCurrentInstance();

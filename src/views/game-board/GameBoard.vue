@@ -1,7 +1,7 @@
 <template>
-  <div class="game-board">
+  <!-- <div class="game-board"> -->
     <pixi-board ref="pixiBoard" id="pixiBoard"></pixi-board>
-  </div>
+  <!-- </div> -->
 </template>
 <script setup lang='ts'>
 import { ref, onMounted, onUnmounted, provide ,ComponentInstance} from 'vue';
@@ -27,7 +27,8 @@ const init = (room:Room,pixiBoard:ComponentInstance<typeof PixiBoard>) => {
   pixiBoard.value.init(room.puzzle,pixiBoard.value);
 };
 
-const roomEvent = (message:SocketMessage) => {
+const handleRoomEvent = (message:SocketMessage) => {
+  console.log("3"+message)
   if (message.event === SocketEventType.Room_Puzzle_Move) {
     const body = message.body;
     puzzleMoveEvent(body);
@@ -70,7 +71,8 @@ const zoom = (strength:number) => {
 };
 
 onMounted(() => {
-  
+  // console.log('123456')
+  // console.log(eventBus.events.value)
   subscriptions.push(
     roomService.roomSubject.subscribe(room => {
       if (room.id) {
@@ -82,9 +84,19 @@ onMounted(() => {
         // subscriptions[0].unsubscribe();
       }
     }),
+    new Subscription(()=>{
+      console.log('555')
+      console.log(eventBus.events.value)
+    })
     //TODO: 取emit事件，能否这样用？
     // roomService.on("roomEvent",(message) => roomEvent(message))
-    new Subscription(() => eventBus.on('roomEvent',roomEvent))
+    // new Subscription(() => eventBus.on('roomEvent',handleRoomEvent
+    
+    // // new Subscription(() => eventBus.on('roomEvent',(message)=>{
+    // //   console.log("2" + message);
+    // //   roomEvent(message);
+    // // }
+    // ))
   );
   console.log(subscriptions)
   // if (roomService.roomSubject.value.id) {
