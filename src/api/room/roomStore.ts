@@ -4,22 +4,26 @@ import { BehaviorSubject } from 'rxjs';
 import { Room } from '@/shared/models/roomModel';
 import { PuzzlePiece } from '@/shared/models/puzzlePieceModel';
 import { RoomUser } from '@/shared/models/roomUserModel';
+import { SocketMessage } from '@/shared/models/ws/socketMessageModel';
 
 interface RoomState {
   client: RoomService | null;
   roomSubject: BehaviorSubject<Room>;
+  messageSubject: BehaviorSubject<SocketMessage>;
 }
 
 export const useRoomStore = defineStore('room', {
   state: (): RoomState => ({
     client: null,
-    roomSubject: new BehaviorSubject<Room>({} as any)
+    roomSubject: new BehaviorSubject<Room>({} as any),
+    messageSubject: new BehaviorSubject<SocketMessage>({} as any)
   }),
   actions: {
     initializeClient() {
       if (!this.client) {
         this.client = useRoomService();
         this.roomSubject = this.client.roomSubject;
+        this.messageSubject = this.client.messageSubject;
         // const room = this.client.roomSubject;
         // if (room){
         //   this.roomSubject = room;

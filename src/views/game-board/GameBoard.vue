@@ -71,34 +71,21 @@ const zoom = (strength:number) => {
 };
 
 onMounted(() => {
-  // console.log('123456')
-  // console.log(eventBus.events.value)
+
   subscriptions.push(
     roomService.roomSubject.subscribe(room => {
       if (room.id) {
-        // setTimeout(() => {
-        //   init(room,pixiBoard);
-        // }, 100)
         init(room,pixiBoard);
         // console.log(subscriptions)
         // subscriptions[0].unsubscribe();
       }
     }),
-    new Subscription(()=>{
-      console.log('555')
-      console.log(eventBus.events.value)
+    roomService.messageSubject.subscribe(message =>{
+      handleRoomEvent(message)
     })
-    //TODO: 取emit事件，能否这样用？
-    // roomService.on("roomEvent",(message) => roomEvent(message))
-    // new Subscription(() => eventBus.on('roomEvent',handleRoomEvent
-    
-    // // new Subscription(() => eventBus.on('roomEvent',(message)=>{
-    // //   console.log("2" + message);
-    // //   roomEvent(message);
-    // // }
-    // ))
+
   );
-  console.log(subscriptions)
+
   // if (roomService.roomSubject.value.id) {
     // console.log(roomService.roomSubject.value)
     // console.log(pixiBoard)

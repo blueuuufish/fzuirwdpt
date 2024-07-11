@@ -17,7 +17,7 @@ import { eventBus } from '@/api/common/eventBus';
 
 export interface RoomService {
   roomSubject: BehaviorSubject<Room>;
-  messageSubject: BehaviorSubject<Room>;
+  messageSubject: BehaviorSubject<SocketMessage>;
   join(id: string, initialDataCallback: Function | null):void;
   detach():void;
   isJoined(): boolean;
@@ -30,9 +30,8 @@ export function useRoomService() {
    //调用父组件方法，需要定义方法名
   const emit = defineEmits(['roomEvent']);
   const roomSubject: BehaviorSubject<Room> = new BehaviorSubject({} as any);
-  const messageSubject: BehaviorSubject<Room> = new BehaviorSubject({} as any);
+  const messageSubject: BehaviorSubject<SocketMessage> = new BehaviorSubject({} as any);
   const stompSubscription = ref<StompSubscription | null>(null);
-
   const router = useRouter();
   const socketGameService = useSocketStore();
 
@@ -107,20 +106,10 @@ export function useRoomService() {
     }
 
     //调用父组件方法，需要传的值
-    console.log("1")
-    console.log(message)
-    eventBus.emit("roomEvent",message);
+    messageSubject.next(message);
+    // eventBus.emit("roomEvent",message);
     // emit('roomEvent', message);
-    // const instance = getCurrentInstance();
-    // if(instance){
-    //   const { proxy } = instance;
-    //   console.log(proxy)
-    //   if (proxy && typeof proxy.roomEvent === 'function') {
-    //     proxy.roomEvent(message);
-    //   }else {
-    //     console.error('Vue instance not found');
-    //   }
-    // }
+
   };
 
   const isJoined = () => {
@@ -153,6 +142,7 @@ export function useRoomService() {
 
   return {
     roomSubject,
+    messageSubject,
     join,
     detach,
     isJoined,
