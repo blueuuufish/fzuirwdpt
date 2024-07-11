@@ -84,7 +84,7 @@ const zoomOut= ():void => {
 
 </script>
 
-<style>
+<style scoped>
 .room-container {
   display: flex;
   flex-direction: column;

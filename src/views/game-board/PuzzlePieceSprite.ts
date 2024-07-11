@@ -155,7 +155,6 @@ export class PuzzlePieceSprite extends Container {
     if(completed) {
       this.eventMode = 'none';
       this.zIndex = -999;
-      
     }
   }
 }

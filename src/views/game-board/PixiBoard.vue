@@ -34,7 +34,7 @@ const pixiContainer = ref<HTMLElement | null>(null);
 // let pieceMap = new Map()
 // let puzzle
 // let activePuzzlePiece = null
-
+let pieceLen:number;
 let pixiApp: Application;
 let pixiViewport: Viewport;
 let worldWidth = 2000
@@ -80,17 +80,22 @@ const dragPieceToWS = (idX: number, idY: number, position: number[]) => {
 };
 const releasePieceToWS = (idX: number, idY: number, position: number[]) => {
   
-  // if(pieceMap.get(len-1) === len) 
   roomService.sendReleasePuzzlePiece({ idX, idY, position, group: 0 });
+  // setTimeout(()=>{
+  //   roomService.sendReleasePuzzlePiece({ idX, idY, position, group: 0 });
+  // },100)
+
+  // }
 };
 const resizeWindow = () => {
-  if(pixiApp){
-    console.log("change",window)
-    
-    pixiApp.resizeTo = window
-  }
+      if (pixiApp && pixiContainer.value) {
+        pixiViewport.screenWidth = window.innerWidth;
+        pixiViewport.screenHeight = window.innerHeight;
+        // pixiApp.renderer.resize(pixiContainer.value.clientWidth, pixiContainer.value.clientHeight);
+   
+      }
+    };
 
-}
 onMounted(() => {
   // initPixi()
   //Property 'value' may not exist on type 'number'. Did you mean 'valueOf'?
@@ -99,6 +104,8 @@ onMounted(() => {
     pixiContainer.value.appendChild(pixiApp.view)
   }
   window.addEventListener('resize', resizeWindow);
+  resizeWindow();
+  // window.addEventListener('resize', resizeWindow);
   // console.log(proxy.$refs.pixiContainer)
 })
 onUnmounted(()=>{
@@ -163,6 +170,8 @@ const init = (puzzleData: Puzzle,pixiBoard:ComponentInstance<typeof PixiBoard>) 
     puzzleTexture = texture;
     createPieces(puzzleData.pieceSize, puzzleData.piecesDimensions, puzzleData.puzzlePieces,pixiBoard);
     pixiApp.resize();
+    pieceLen = pieceMap.size;
+
     // pixiApp.resizeTo  = window;
   });
 };
@@ -197,7 +206,7 @@ const createPieces = (pieceSize: number[], piecesDimensions: number[], pieces: P
 
       if (piece.group === -9999) {
         pieceSprite.setCompleted(true);
-        
+        console.log('1999', pieceMap.get(-9999)?.length);
       }
 
       puzzlePieces[j][i] = pieceSprite;
@@ -219,6 +228,7 @@ const setGroup = (pieceSprite: PuzzlePieceSprite, group: number) => {
   } else {
     pieceMap.set(group, [pieceSprite]);
   }
+
 };
 const dragPieceSprite = (pieceSprite: PuzzlePieceSprite) => {
     dragPieceToWS(pieceSprite.idX, pieceSprite.idY, [pieceSprite.position.x, pieceSprite.position.y]);
@@ -228,6 +238,7 @@ const dragPieceSprite = (pieceSprite: PuzzlePieceSprite) => {
 };
 
 const releasePieceSprite = (pieceSprite: PuzzlePieceSprite) => {
+    console.log('map', pieceMap)
     releasePieceToWS(pieceSprite.idX, pieceSprite.idY, [pieceSprite.position.x, pieceSprite.position.y]);
     startPanning();
 };
@@ -264,9 +275,23 @@ const movePieceGroup = (keyPieceSprite: PuzzlePieceSprite) => {
 
     setGroup(pieceSprite, piece.group);
     pieceSprite.setPosition(piece.position[0], piece.position[1]);
+    // console.log("============");
+    
+    // console.log(pieceSprite);
+    
     pieceSprite.setInteractedUser(null);
+    let piecesLen = puzzle.piecesDimensions[0]*puzzle.piecesDimensions[1];
     if(piece.group === -9999) {
       pieceSprite.setCompleted(true);
+      // console.log(piecesLen);
+      if(pieceMap.get(-9999)?.length === piecesLen){
+        // setTimeout(()=>{
+          alert('成功啦，hhhhh')
+        // },100)
+          
+      }
+      
+      // console.log('12334', pieceMap.get(-9999)?.length);
   //     console.log('map', pieceMap)
   // let len = pieceMap.size
   // pieceMap.has(len-1)
@@ -280,6 +305,7 @@ const movePieceGroup = (keyPieceSprite: PuzzlePieceSprite) => {
 
       if(piece.group === -9999) {
         pSprite.setCompleted(true);
+        console.log('42111', pieceMap.get(-9999)?.length);
       }
     }
     movePieceGroup(pieceSprite);
@@ -325,7 +351,7 @@ const movePieceGroup = (keyPieceSprite: PuzzlePieceSprite) => {
   });
 </script>
 
-<style>
+<style scoped>
 #pixiBoard {
   display: flex;
   width: 100%;

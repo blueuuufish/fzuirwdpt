@@ -79,7 +79,6 @@ onMounted(() => {
         if(subscriptions[0]!==undefined){
           subscriptions[0].unsubscribe();
         }
-        
       }
     }),
     roomService.messageSubject.subscribe(message =>{
@@ -104,7 +103,7 @@ const gameBoardKey = Symbol('gameBoard')
 provide(gameBoardKey,{pixiBoard})
 
 </script>
-<style>
+<style scoped>
 .game-board {
   height: 100%;
   width: 100%;
