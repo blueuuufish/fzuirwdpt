@@ -1,7 +1,8 @@
 <template>
-  <div class="align-center"
+    <div class="align-center"
        ref="pixiContainer"
        id="pixiContainer"></div>
+
 </template>
 
 <script setup lang="ts">
@@ -12,7 +13,8 @@ import {
   defineComponent,
   getCurrentInstance,
   inject,
-  ComponentInstance
+  ComponentInstance,
+  onUnmounted
 } from 'vue'
 import { Application, Assets, Container, Sprite, Texture } from 'pixi.js'
 import { Viewport } from 'pixi-viewport'
@@ -35,14 +37,15 @@ const pixiContainer = ref<HTMLElement | null>(null);
 
 let pixiApp: Application;
 let pixiViewport: Viewport;
-const worldWidth = 2000
-const worldHeight = 1500
+let worldWidth = 2000
+let worldHeight = 1500
 let puzzleTexture: Texture;
 const pieceContainer = new Container()
 let puzzlePieces: PuzzlePieceSprite[][] = [];
 let pieceMap: Map<number, PuzzlePieceSprite[]> = new Map();
 let puzzle: Puzzle;
 let activePuzzlePiece: PuzzlePieceSprite | null = null;
+
 // const pixiBoard = ref();
 const initPixi = () => {
   // console.log(pixiBoard)
@@ -53,7 +56,7 @@ const initPixi = () => {
     backgroundAlpha: 0,
     resolution: 1,
     //TODO: hostRef.nativeElement  hostRef: ElementRef 是什么？？
-    resizeTo: proxy.$refs.pixiContainer
+    resizeTo: window
   })
   pixiViewport = new Viewport({
     screenWidth: window.innerWidth,
@@ -76,8 +79,18 @@ const dragPieceToWS = (idX: number, idY: number, position: number[]) => {
   roomService.sendMovePuzzlePiece({ idX, idY, position, group: 0 });
 };
 const releasePieceToWS = (idX: number, idY: number, position: number[]) => {
+  
+  // if(pieceMap.get(len-1) === len) 
   roomService.sendReleasePuzzlePiece({ idX, idY, position, group: 0 });
 };
+const resizeWindow = () => {
+  if(pixiApp){
+    console.log("change",window)
+    
+    pixiApp.resizeTo = window
+  }
+
+}
 onMounted(() => {
   // initPixi()
   //Property 'value' may not exist on type 'number'. Did you mean 'valueOf'?
@@ -85,8 +98,12 @@ onMounted(() => {
     // console.log('sadasd')
     pixiContainer.value.appendChild(pixiApp.view)
   }
-
+  window.addEventListener('resize', resizeWindow);
   // console.log(proxy.$refs.pixiContainer)
+})
+onUnmounted(()=>{
+  window.removeEventListener('resize', resizeWindow);
+
 })
 const onDragMove = (event:any) => {
       // console.log('dragmove');
@@ -94,10 +111,15 @@ const onDragMove = (event:any) => {
         activePuzzlePiece.onDragMove(event);
       }
     };
-const setWorldSize = (worldWidth: number, worldHeight: number) => {
+const setWorldSize = (_worldWidth: number, _worldHeight: number) => {
   // pixiViewport.resize(worldWidth, worldHeight);
-  pixiViewport.worldWidth = worldWidth;
-  pixiViewport.worldHeight = worldHeight;
+
+  worldWidth = _worldWidth;
+  worldHeight = _worldHeight
+
+
+  pixiViewport.worldWidth = _worldWidth;
+  pixiViewport.worldHeight = _worldHeight;
   pixiViewport.clamp({ direction: 'all' });
   pixiViewport.clampZoom({
     minWidth: pixiViewport.screenWidth / 3,
@@ -113,7 +135,7 @@ const init = (puzzleData: Puzzle,pixiBoard:ComponentInstance<typeof PixiBoard>) 
 
   puzzle = puzzleData;
   setWorldSize(puzzleData.worldSize[0], puzzleData.worldSize[1]);
-  console.log(puzzleData)
+  // console.log(puzzleData)
  //Texture.fromURL(puzzleData.imageBase64)
 
   Assets.load(puzzleData.imageBase64).then((texture: Texture) => {
@@ -122,24 +144,26 @@ const init = (puzzleData: Puzzle,pixiBoard:ComponentInstance<typeof PixiBoard>) 
     const bgOffsetY = puzzleData.pieceSize[1] * PuzzlePieceSprite.SHAPE_OFFSET;
     const bgSprite = new Sprite(texture);
     // const bgSprite1 = new Sprite(texture);
-    console.log('7865',texture);
+
     bgSprite.width = puzzleData.imageSize[0];
     bgSprite.height = puzzleData.imageSize[1];
     bgSprite.alpha = 0.5;
     bgSprite.position.set(worldWidth / 2 - bgSprite.width / 2 - bgOffsetX, worldHeight / 2 - bgSprite.height / 2 - bgOffsetY);
-    console.log("5678"+bgSprite)
+    // bgSprite.position.set(1458.5 , 582.75);
+    
+
     
     pixiViewport.addChild(bgSprite);
-    console.log('2134', pixiViewport);
-    console.log('7877', bgSprite);
+
     
     pixiViewport.addChild(pieceContainer);
     pixiViewport.moveCenter(bgSprite.position.x + bgSprite.width / 2, bgSprite.position.y + bgSprite.height / 2);
-    console.log('213', pixiViewport);
+
     
     puzzleTexture = texture;
     createPieces(puzzleData.pieceSize, puzzleData.piecesDimensions, puzzleData.puzzlePieces,pixiBoard);
     pixiApp.resize();
+    // pixiApp.resizeTo  = window;
   });
 };
 const reset = () => {
@@ -173,6 +197,7 @@ const createPieces = (pieceSize: number[], piecesDimensions: number[], pieces: P
 
       if (piece.group === -9999) {
         pieceSprite.setCompleted(true);
+        
       }
 
       puzzlePieces[j][i] = pieceSprite;
@@ -242,6 +267,10 @@ const movePieceGroup = (keyPieceSprite: PuzzlePieceSprite) => {
     pieceSprite.setInteractedUser(null);
     if(piece.group === -9999) {
       pieceSprite.setCompleted(true);
+  //     console.log('map', pieceMap)
+  // let len = pieceMap.size
+  // pieceMap.has(len-1)
+  // console.log('12334',len, pieceMap.get(len-1));
     }
 
     for(let i = 0; i < changedPieces.length; i++) {
@@ -296,11 +325,15 @@ const movePieceGroup = (keyPieceSprite: PuzzlePieceSprite) => {
   });
 </script>
 
-<style scoped>
+<style>
+#pixiBoard {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
 #pixiContainer {
   display: flex;
   width: 100%;
   height: 100%;
-  z-index: 999;
 }
 </style>

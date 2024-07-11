@@ -26,12 +26,13 @@
     <span class="spacer"></span>
     <div id="action-panel" class="clickable">
       <el-tooltip content="缩小" placement="top">
-        <el-button @click="zoomOut" size="mini" type="primary" circle>
+        <el-button @click="zoomOut" size="mini" type="primary" circle
+        icon="el-icon-remove">
           <ZoomOut />
         </el-button>
       </el-tooltip>
       <el-tooltip content="放大" placement="top">
-        <el-button @click="zoomIn" size="mini" type="primary" circle>
+        <el-button @click="zoomIn" size="mini" type="primary" circle icon="el-icon-circle-plus">
           <ZoomIn />
         </el-button>
       </el-tooltip>
@@ -83,7 +84,7 @@ const zoomOut= ():void => {
 
 </script>
 
-<style scoped>
+<style>
 .room-container {
   display: flex;
   flex-direction: column;

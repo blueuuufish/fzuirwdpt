@@ -1,7 +1,7 @@
 <template>
-  <!-- <div class="game-board"> -->
-    <pixi-board ref="pixiBoard" id="pixiBoard"></pixi-board>
-  <!-- </div> -->
+  <div id="pixiBoard">
+    <pixi-board ref="pixiBoard" ></pixi-board>
+  </div>
 </template>
 <script setup lang='ts'>
 import { ref, onMounted, onUnmounted, provide ,ComponentInstance} from 'vue';
@@ -28,7 +28,6 @@ const init = (room:Room,pixiBoard:ComponentInstance<typeof PixiBoard>) => {
 };
 
 const handleRoomEvent = (message:SocketMessage) => {
-  console.log("3"+message)
   if (message.event === SocketEventType.Room_Puzzle_Move) {
     const body = message.body;
     puzzleMoveEvent(body);
@@ -77,7 +76,10 @@ onMounted(() => {
       if (room.id) {
         init(room,pixiBoard);
         // console.log(subscriptions)
-        // subscriptions[0].unsubscribe();
+        if(subscriptions[0]!==undefined){
+          subscriptions[0].unsubscribe();
+        }
+        
       }
     }),
     roomService.messageSubject.subscribe(message =>{
@@ -102,7 +104,7 @@ const gameBoardKey = Symbol('gameBoard')
 provide(gameBoardKey,{pixiBoard})
 
 </script>
-<style scoped>
+<style>
 .game-board {
   height: 100%;
   width: 100%;
