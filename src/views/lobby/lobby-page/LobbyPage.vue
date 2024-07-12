@@ -13,7 +13,7 @@ import { SocketGameData } from '@/shared/models/ws/SocketGameDataModel';
 import { useSocketStore } from '@/api/ws/socketStore';
 import { Subscription } from 'rxjs';
 import {useLobbyStore} from '@/api/lobby/lobbyStore'
-import {useRoomStore} from '@/api/room/roomStore'
+// import {useRoomStore} from '@/api/room/roomStore'
 
 // import {PuzzlePieceSprite} from '../../game-board/PuzzelePieceSprite'
 
@@ -24,8 +24,8 @@ socketStore.initializeClient();
 console.log('初始化WebSocket client...');
 const lobbyService = useLobbyStore();
 lobbyService.initializeClient();
-const roomService = useRoomStore();
-roomService.initializeClient();
+// const roomService = useRoomStore();
+// roomService.initializeClient();
 onMounted(()=>{
   // const new PuzzlePieceSprite()
   subscriptions.push(

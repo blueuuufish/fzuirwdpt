@@ -102,7 +102,7 @@ export class PuzzlePieceSprite extends Container {
 
   private onDragEnd(event:any):void {
     if(this.interactedUser || this.completed) return;
-
+    console.log(this.interactedUser,"release")
     const target = event.currentTarget;
 
     this.dragging = false;

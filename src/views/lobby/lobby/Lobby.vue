@@ -20,12 +20,15 @@ import LobbyNav from './LobbyNav.vue'
 import CreateRoom from './CreateRoom.vue'
 import LobbyRoomBlock from './LobbyRoomBlock.vue'
 import {LobbyInitialDataDto} from '@/shared/models/dto/lobbyInitDataDto'
+import {useRoomStore} from '@/api/room/roomStore'
 
 
 const creatingRoom = ref(false);
 const rooms = ref<Room[]>([]);
 let subscriptions: Subscription[]= [];
 const lobbyService = useLobbyStore();
+const roomService = useRoomStore();
+roomService.initializeClient();
 const loadInitialData= (initialData: LobbyInitialDataDto) =>{
     // this.rooms = of(initialData.rooms);
   }

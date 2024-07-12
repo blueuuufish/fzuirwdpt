@@ -23,7 +23,7 @@ let subscriptions:Subscription[] = [];
 
 const init = (room:Room,pixiBoard:ComponentInstance<typeof PixiBoard>) => {
   //TODO: 调用pixiBoard的方法，需要pixiBoard导出 defineExpose
-  console.log(pixiBoard.value)
+  // console.log(pixiBoard.value)
   pixiBoard.value.init(room.puzzle,pixiBoard.value);
 };
 
@@ -71,21 +71,26 @@ const zoom = (strength:number) => {
 
 onMounted(() => {
 
+
+
   subscriptions.push(
     roomService.roomSubject.subscribe(room => {
       if (room.id) {
         init(room,pixiBoard);
-        // console.log(subscriptions)
-        if(subscriptions[0]!==undefined){
-          subscriptions[0].unsubscribe();
-        }
+        console.log('asdasd',subscriptions)
+        // if(subscriptions[0]!==undefined){
+          
+        //   subscriptions[0].unsubscribe();
+        //   console.log('取消订阅',subscriptions)
+        // }
       }
     }),
     roomService.messageSubject.subscribe(message =>{
       handleRoomEvent(message)
     })
-
-  );
+    );
+    subscriptions[0].unsubscribe();
+    console.log('222',subscriptions)
 
   // if (roomService.roomSubject.value.id) {
     // console.log(roomService.roomSubject.value)
