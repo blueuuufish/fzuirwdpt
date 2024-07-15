@@ -288,16 +288,14 @@ const movePieceGroup = (keyPieceSprite: PuzzlePieceSprite) => {
         const endTime = new Date().getTime();
         if(startTime){
           const totalTime = (endTime - startTime) / 1000;
-          // const formData:FormData = new FormData();
-          // formData.append('id',roomService.roomSubject.value.id)
-          // formData.append('score',`${totalTime}`);
-          const formData = {id: roomService.roomSubject.value.id,score: totalTime}
+          const formData:FormData = new FormData();
+          formData.append('id',roomService.roomSubject.value.id)
+          formData.append('score',`${totalTime}`);
+          // const formData = {id: roomService.roomSubject.value.id,score: totalTime}
           request.post({
             url:`${environment.apiUrl}/leaderboard/addScore`,
             data:formData,
-            headers: {
-            'Content-Type': 'application/json'
-            }
+            headersType:'application/json'
           }).then((data)=>{
             console.log(data)
           })

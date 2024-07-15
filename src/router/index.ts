@@ -5,7 +5,7 @@ import GameBoard from '../views/game-board/GameBoard.vue'
 import Lobby_Nav from '../views/lobby/lobby_nav.vue'
 import LobbyPage from '../views/lobby/lobby-page/LobbyPage.vue'
 import Create_Room from '../views/lobby/create_room.vue'
-import Test from '../views/Test.vue'
+import Test from '@/views/leaderboard/index.vue'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
