@@ -66,26 +66,45 @@ const zoom = (strength:number) => {
 
   pixiBoard.value.zoom(strength);
 };
+let initCompleted = false;
 
 onMounted(() => {
-
-
+  // subscriptions.push(
+  //   roomService.roomSubject.subscribe(room => {
+  //     if (room.id) {
+  //       init(room,pixiBoard);
+  //       initCompleted = true;
+  //       // if(subscriptions[0]!==undefined){  
+  //       //   subscriptions[0].unsubscribe();
+  //       //   console.log('取消订阅',subscriptions)
+  //       // }
+  //     }
+  //   }),
+  //   roomService.messageSubject.subscribe(message =>{
+  //     if (initCompleted){
+  //       handleRoomEvent(message)
+  //     }
+  //   })
+  //   );
 
   subscriptions.push(
     roomService.roomSubject.subscribe(room => {
       if (room.id) {
         init(room,pixiBoard);
-        // if(subscriptions[0]!==undefined){
-          
+        initCompleted = true;
+        // if(subscriptions[0]!==undefined){  
         //   subscriptions[0].unsubscribe();
         //   console.log('取消订阅',subscriptions)
         // }
       }
-    }),
-    roomService.messageSubject.subscribe(message =>{
-      handleRoomEvent(message)
-    })
-    );
+    }));
+    if (initCompleted){
+      console.log('1111');
+      
+      subscriptions.push(roomService.messageSubject.subscribe(message =>{
+        handleRoomEvent(message)}))
+    }
+    
     subscriptions[0].unsubscribe();
 
   // if (roomService.roomSubject.value.id) {

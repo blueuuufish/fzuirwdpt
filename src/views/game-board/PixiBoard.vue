@@ -182,7 +182,7 @@ const reset = () => {
   pieceContainer.removeChildren();
 };
 // const {proxy} = getCurrentInstance() 
-const createPieces = (pieceSize: number[], piecesDimensions: number[], pieces: PuzzlePiece[],pixiBoard:ComponentInstance<typeof PixiBoard>) => {
+const createPieces =  (pieceSize: number[], piecesDimensions: number[], pieces: PuzzlePiece[],pixiBoard:ComponentInstance<typeof PixiBoard>) => {
   const scaleX = puzzle.imageSize[0] / puzzleTexture.width;
   const scaleY = puzzle.imageSize[1] / puzzleTexture.height;
 
@@ -241,12 +241,23 @@ const releasePieceSprite = (pieceSprite: PuzzlePieceSprite) => {
     startPanning();
 };
 const movePiece = (user: RoomUser, piece: PuzzlePiece) => {
+
+  if(puzzlePieces.length!==0){
     const pieceSprite: PuzzlePieceSprite = puzzlePieces[piece.idX][piece.idY];
 
     pieceSprite.setPosition(piece.position[0], piece.position[1]);
     pieceSprite.setInteractedUser(user);
 
     movePieceGroup(pieceSprite);
+
+  }
+
+    // const pieceSprite: PuzzlePieceSprite = puzzlePieces[piece.idX][piece.idY];
+
+    // pieceSprite.setPosition(piece.position[0], piece.position[1]);
+    // pieceSprite.setInteractedUser(user);
+
+    // movePieceGroup(pieceSprite);
 };
 const getRealX = (idX: number): number => {
     return puzzle.worldSize[0]/2.- puzzle.imageSize[0]/2.-puzzle.pieceSize[0]/4.+idX*puzzle.pieceSize[0];
@@ -297,11 +308,9 @@ const movePieceGroup = (keyPieceSprite: PuzzlePieceSprite) => {
             data:formData,
             headersType:'application/json'
           }).then((data)=>{
-            console.log(data)
+            alert(`成功啦，总时长：${totalTime.toFixed(0)}秒`)
           })
-          alert(`成功啦，总时长：${totalTime.toFixed(0)}秒`);
-        }
-          
+        }    
       }
     }
 
