@@ -21,7 +21,6 @@ const socketGameData = ref<SocketGameData|null>(null); // 根据你的逻辑初�
 let subscriptions: Subscription[]= [];
 const socketStore = useSocketStore();
 socketStore.initializeClient();
-console.log('初始化WebSocket client...');
 const lobbyService = useLobbyStore();
 lobbyService.initializeClient();
 // const roomService = useRoomStore();
@@ -35,8 +34,6 @@ onMounted(()=>{
   )
 //   const { proxy, ctx } = getCurrentInstance()
 //       const _this = ctx
-//       console.log('proxy', proxy);
-//       console.log('ctx', ctx);
 })
 onUnmounted(()=>{
   lobbyService.detach();

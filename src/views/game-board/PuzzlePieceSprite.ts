@@ -25,7 +25,6 @@ export class PuzzlePieceSprite extends Container {
   constructor(private pixiBoard: ComponentInstance<typeof PixiBoard>, puzzleTexture: Texture, tPieceWidth: number, tPieceHeight: number,
     tIdX: number, tIdY: number, scaleX: number, scaleY: number, piecesDimensions: number[]) {
     super();
-    // console.log(pixiBoard)
 
     this.idX = tIdX;
     this.idY = tIdY;
@@ -102,7 +101,6 @@ export class PuzzlePieceSprite extends Container {
 
   private onDragEnd(event:any):void {
     if(this.interactedUser || this.completed) return;
-    console.log(this.interactedUser,"release")
     const target = event.currentTarget;
 
     this.dragging = false;

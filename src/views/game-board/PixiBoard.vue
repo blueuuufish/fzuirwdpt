@@ -26,6 +26,11 @@ import { RoomUser } from '@/shared/models/roomUserModel'
 import {useRoomStore} from '@/api/room/roomStore';
 import { before, create } from 'lodash-es'
 import PixiBoard from './PixiBoard.vue';
+import {RankDto} from '@/shared/models/dto/rankDto';
+import {useTimerStore} from '@/store/timeStore'
+import request from '@/utils/request'
+import { from } from 'rxjs'
+import { environment } from '@/environments/environment'
 const pixiContainer = ref<HTMLElement | null>(null);
 // let pixiApp
 // let pixiViewport
@@ -48,14 +53,12 @@ let activePuzzlePiece: PuzzlePieceSprite | null = null;
 
 // const pixiBoard = ref();
 const initPixi = () => {
-  // console.log(pixiBoard)
   const {proxy} = getCurrentInstance() 
 
   pixiApp = new Application({
     antialias: true,
     backgroundAlpha: 0,
     resolution: 1,
-    //TODO: hostRef.nativeElement  hostRef: ElementRef 是什么？？
     resizeTo: window
   })
   pixiViewport = new Viewport({
@@ -100,13 +103,11 @@ onMounted(() => {
   // initPixi()
   //Property 'value' may not exist on type 'number'. Did you mean 'valueOf'?
   if (pixiContainer.value) {
-    // console.log('sadasd')
     pixiContainer.value.appendChild(pixiApp.view)
   }
   window.addEventListener('resize', resizeWindow);
   resizeWindow();
   // window.addEventListener('resize', resizeWindow);
-  // console.log(proxy.$refs.pixiContainer)
 })
 onUnmounted(()=>{
   window.removeEventListener('resize', resizeWindow);
@@ -142,7 +143,6 @@ const init = (puzzleData: Puzzle,pixiBoard:ComponentInstance<typeof PixiBoard>) 
 
   puzzle = puzzleData;
   setWorldSize(puzzleData.worldSize[0], puzzleData.worldSize[1]);
-  // console.log(puzzleData)
  //Texture.fromURL(puzzleData.imageBase64)
 
   Assets.load(puzzleData.imageBase64).then((texture: Texture) => {
@@ -206,7 +206,6 @@ const createPieces = (pieceSize: number[], piecesDimensions: number[], pieces: P
 
       if (piece.group === -9999) {
         pieceSprite.setCompleted(true);
-        console.log('1999', pieceMap.get(-9999)?.length);
       }
 
       puzzlePieces[j][i] = pieceSprite;
@@ -238,7 +237,6 @@ const dragPieceSprite = (pieceSprite: PuzzlePieceSprite) => {
 };
 
 const releasePieceSprite = (pieceSprite: PuzzlePieceSprite) => {
-    console.log('map', pieceMap)
     releasePieceToWS(pieceSprite.idX, pieceSprite.idY, [pieceSprite.position.x, pieceSprite.position.y]);
     startPanning();
 };
@@ -275,27 +273,38 @@ const movePieceGroup = (keyPieceSprite: PuzzlePieceSprite) => {
 
     setGroup(pieceSprite, piece.group);
     pieceSprite.setPosition(piece.position[0], piece.position[1]);
-    // console.log("============");
-    
-    // console.log(pieceSprite);
+
     
     pieceSprite.setInteractedUser(null);
     let piecesLen = puzzle.piecesDimensions[0]*puzzle.piecesDimensions[1];
     if(piece.group === -9999) {
       pieceSprite.setCompleted(true);
-      // console.log(piecesLen);
       if(pieceMap.get(-9999)?.length === piecesLen){
         // setTimeout(()=>{
-          alert('成功啦，hhhhh')
+          // alert('成功啦，hhhhh')
         // },100)
+        const timeStore = useTimerStore();
+        const startTime = timeStore.getStartTime();
+        const endTime = new Date().getTime();
+        if(startTime){
+          const totalTime = (endTime - startTime) / 1000;
+          // const formData:FormData = new FormData();
+          // formData.append('id',roomService.roomSubject.value.id)
+          // formData.append('score',`${totalTime}`);
+          const formData = {id: roomService.roomSubject.value.id,score: totalTime}
+          request.post({
+            url:`${environment.apiUrl}/leaderboard/addScore`,
+            data:formData,
+            headers: {
+            'Content-Type': 'application/json'
+            }
+          }).then((data)=>{
+            console.log(data)
+          })
+          alert(`成功啦，总时长：${totalTime.toFixed(0)}秒`);
+        }
           
       }
-      
-      // console.log('12334', pieceMap.get(-9999)?.length);
-  //     console.log('map', pieceMap)
-  // let len = pieceMap.size
-  // pieceMap.has(len-1)
-  // console.log('12334',len, pieceMap.get(len-1));
     }
 
     for(let i = 0; i < changedPieces.length; i++) {
@@ -305,7 +314,6 @@ const movePieceGroup = (keyPieceSprite: PuzzlePieceSprite) => {
 
       if(piece.group === -9999) {
         pSprite.setCompleted(true);
-        console.log('42111', pieceMap.get(-9999)?.length);
       }
     }
     movePieceGroup(pieceSprite);

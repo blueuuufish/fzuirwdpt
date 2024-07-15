@@ -83,21 +83,16 @@ export function useLobbyService():LobbyService {
   }
 
   const createRoom = (lobbyCreateRoom: LobbyCreateRoomDto, imageFile: File) => {
-    console.log('------')
-    console.log(imageFile);
     const formData: FormData = new FormData();
     formData.append('file', imageFile);
     const jsonBlob = new Blob([JSON.stringify(lobbyCreateRoom)], { type: 'application/json' });
-        formData.append('dto', jsonBlob, 'dto.json');
-    console.log("===");
-    console.log(formData. get("file"));
+    formData.append('dto', jsonBlob, 'dto.json');
+
     
     request.post({
       url: `${environment.apiUrl}/rooms`,
       data: formData
     }).then((room:Room)=> {
-      // console.log(data)
-      // TODO: 订阅？？？
       roomService.join(room.id); 
     })
    

@@ -22,8 +22,6 @@ const socketGameService = useSocketStore();
 let subscriptions:Subscription[] = [];
 
 const init = (room:Room,pixiBoard:ComponentInstance<typeof PixiBoard>) => {
-  //TODO: 调用pixiBoard的方法，需要pixiBoard导出 defineExpose
-  // console.log(pixiBoard.value)
   pixiBoard.value.init(room.puzzle,pixiBoard.value);
 };
 
@@ -36,7 +34,7 @@ const handleRoomEvent = (message:SocketMessage) => {
     puzzleReleaseEvent(body);
   } else if (message.event === SocketEventType.Room_UserLeft) {
     const body = message.body;
-    //TODO: 需要调用子组件的方法
+
     pixiBoard.value.removeInteractionFromPieces(body.user);
   }
 };
@@ -47,12 +45,12 @@ const puzzleMoveEvent = (roomPuzzleMove:RoomPuzzleMoveDto) => {
   const user = roomService.getUserByUsername(roomPuzzleMove.username);
   if (!user) return;
 
-   //TODO: 需要调用子组件的方法
+
   pixiBoard.value.movePiece(user, roomPuzzleMove.puzzlePiece);
 };
 
 const puzzleReleaseEvent = (roomPuzzleRelease:RoomPuzzleReleaseDto) => {
-   //TODO: 需要调用子组件的方法
+
   pixiBoard.value.releasePiece(roomPuzzleRelease.puzzlePiece, roomPuzzleRelease.changedPieces);
 };
 
@@ -65,7 +63,7 @@ const releasePiece = (idX: number, idY: number, position: number[]) => {
 };
 
 const zoom = (strength:number) => {
-   //TODO: 需要调用子组件的方法
+
   pixiBoard.value.zoom(strength);
 };
 
@@ -77,7 +75,6 @@ onMounted(() => {
     roomService.roomSubject.subscribe(room => {
       if (room.id) {
         init(room,pixiBoard);
-        console.log('asdasd',subscriptions)
         // if(subscriptions[0]!==undefined){
           
         //   subscriptions[0].unsubscribe();
@@ -90,11 +87,9 @@ onMounted(() => {
     })
     );
     subscriptions[0].unsubscribe();
-    console.log('222',subscriptions)
 
   // if (roomService.roomSubject.value.id) {
-    // console.log(roomService.roomSubject.value)
-    // console.log(pixiBoard)
+
     // init(roomService.roomSubject.value,pixiBoard);
   // }
 });

@@ -42,7 +42,6 @@ onMounted(()=>{
       // lobbyService.lobbyEvent.subscribe((message: SocketMessage) => this.lobbyEvent(message)),
     lobbyService.roomListSubject.subscribe((roomList: Room[]) => {
         rooms.value = roomList;
-        console.log(roomList)
       })
   );
 })

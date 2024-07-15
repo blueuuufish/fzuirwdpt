@@ -21,8 +21,6 @@ export function useSocketGameService(): SocketGameService {
   const socketGameDataSubject = new BehaviorSubject<SocketGameData | null>(null);
 
   const initializeWebSocketConnection = (connectHeaders: any, connectCallback: Function) => {
-    console.log("connectHeaders")
-    console.log(connectHeaders['playerName'])
     const ws = new SockJS(environment.wsApiUrl);
     stompClient = Stomp.over(() => ws);
     stompClient.onConnect = (frame: any) => {
@@ -37,7 +35,6 @@ export function useSocketGameService(): SocketGameService {
   };
 
   const onConnect = (frame: any) => {
-    // console.log("socketGameService的onConnect函数被触发了");
     socketGameDataSubject.next(new SocketGameData(frame.headers['user-name']))
     console.log("CONNECTED");
     // stompClient?.publish({
@@ -52,8 +49,6 @@ export function useSocketGameService(): SocketGameService {
 
   const connect = (playerName: string | null): Promise<void> => {
     let headers:any = {};
-    console.log("socketGameService的connect函数被触发了");
-    console.log(playerName)
     return new Promise<void>((resolve, reject) => {
       // const connectHeaders = { playerName };
       headers["Player-Name"] = playerName ?? "";
@@ -70,17 +65,15 @@ export function useSocketGameService(): SocketGameService {
   };
 
   const disconnect = () => {
-    console.log("断开链接");
     stompClient?.deactivate();
     socketGameDataSubject.next(null);
-    console.log("已断开");
+
     // stompClient?.disconnect(() => {
     //   console.log('Disconnected');
     // });
   };
 
   const publish = (destination: string, body: any) => {
-    console.log("socketGameService的publish函数被触发了");
     if (stompClient?.connected) {
       stompClient.publish({
         destination,
@@ -92,7 +85,6 @@ export function useSocketGameService(): SocketGameService {
   };
 
   const subscribe = (destination: string, callback: messageCallbackType): StompSubscription | null => {
-    console.log("socketGameService的subscribe函数被触发了");
     if (stompClient?.connected) {
       return stompClient.subscribe(destination, callback);
     } else {

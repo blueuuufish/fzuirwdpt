@@ -60,7 +60,6 @@ export function useRoomService() {
        }
      }
      receiveMessage(socketMessage);
-    //  console.log(router)
      router.push('/room');
    })
    if(sub){
@@ -71,7 +70,6 @@ export function useRoomService() {
   
   const setRoomSubject = (room: Room) => {
     roomSubject.next(room);
-    console.log(room,'save room');
   };
 
   const detach = () => {
@@ -83,7 +81,6 @@ export function useRoomService() {
   };
 
   const receiveMessage = (message: SocketMessage) => {
-    console.log("接受消息",message)
     if (message.event === SocketEventType.Room_UserJoined) {
       const messageBody: RoomUserJoinedDto = message.body;
       const roomUser: RoomUser = new RoomUser(messageBody.user.username, messageBody.user.colorId);

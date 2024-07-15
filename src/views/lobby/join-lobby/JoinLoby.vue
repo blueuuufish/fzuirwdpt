@@ -37,8 +37,6 @@ const isValidPlayerName = computed(() => {
 
 const onSubmit = async() => {
   try {
-    console.log("1111")
-    console.log(playerName.value)
     await socketStore.connectClient(playerName.value)
   } catch (error) {
     console.error('Failed to connect', error);

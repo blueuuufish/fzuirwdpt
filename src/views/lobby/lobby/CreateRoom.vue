@@ -208,6 +208,7 @@ import convertImageToBase64 from "@/utils/convertImageToBase64";
 import {useSocketStore} from "@/api/ws/socketStore"
 import {useRouter} from 'vue-router'
 import MainPanel from '@/shared/components/MainPanel'
+import {useTimerStore} from '@/store/timeStore'
 
 const form = ref({
   pieces: 20,
@@ -227,6 +228,10 @@ const imagePaths = [
   require('@/assets/default_images/default004.jpg'),
   require('@/assets/default_images/default005.jpg'),
   require('@/assets/default_images/default006.jpg'),
+  require('@/assets/default_images/default007.jpg'),
+  require('@/assets/default_images/default008.jpg'),
+  require('@/assets/default_images/default009.jpg'),
+  require('@/assets/default_images/default010.jpg'),
 ];
 
 onMounted(async () => {
@@ -244,15 +249,13 @@ onMounted(async () => {
 });
 
 const selectImage = (image,index) => {
-  console.log(imageFiles.value)
-  // console.log(index)
   if(index>=0){
     puzzleImage.value = imageFiles.value[index]
   }
   form.value.puzzleImage = image;
   
   // form.value.puzzleImage = image;
-  // console.log(form.value.puzzleImage)
+
   
 };
 
@@ -281,7 +284,9 @@ const fileInput = ref(null);
 
 const onSubmit = () => {
   const lobbyService = useLobbyService();
-  console.log()
+  const startTime = new Date().getTime();
+  const timeStore = useTimerStore();
+  timeStore.setStartTime(startTime);
   lobbyService.createRoom(
     {
       pieces: form.value.pieces,
