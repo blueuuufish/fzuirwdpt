@@ -1,18 +1,18 @@
 <template>
-  <el-card class="box-card">
+  <uni-card class="box-card">
     <template #header>
       <div class="clearfix">#{{ room.id }}</div>
     </template>
     <div>
       <div class="player-number-panel">
-        <el-icon><i class="el-icon-user-solid"></i></el-icon>
+        <uni-icons><i class="el-icon-user-solid"></i></uni-icons>
         <span>{{ room.users.length }}/{{ room.userCapacity }}</span>
       </div>
     </div>
     <div class="card-actions">
-      <el-button type="primary" @click="clickOnJoinBtn">Join</el-button>
+      <uni-button type="primary" @click="clickOnJoinBtn">Join</uni-button>
     </div>
-  </el-card>
+  </uni-card>
 </template>
 
 <script lang="ts" setup>
