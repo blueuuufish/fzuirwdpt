@@ -1,14 +1,13 @@
 <template>
-  <!-- <game-board id="gameBoard" ref="gameBoard"></game-board> -->
   <div v-if="room && room.id" class="room-container">
-    <el-card class="room-id-card">
+    <uni-card class="room-id-card">
       <p>Room {{ room.id }}</p>
-    </el-card>
+    </uni-card>
 
     <div id="info-panel-container" class="unclickable">
       <div id="info-panel">
         <div id="player-list">
-          <el-card>
+          <uni-card>
             <div slot="header" class="clearfix">
               <span>Players</span>
             </div>
@@ -19,23 +18,22 @@
                 </div>
               </li>
             </ul>
-          </el-card>
+          </uni-card>
         </div>
       </div>
     </div>
     <span class="spacer"></span>
     <div id="action-panel" class="clickable">
-      <el-tooltip content="缩小" placement="top">
-        <el-button @click="zoomOut" size="mini" type="primary" circle
-        icon="el-icon-remove">
+      <uni-tooltip content="缩小" placement="top">
+        <uni-button @click="zoomOut" size="mini" type="primary" circle>
           <ZoomOut />
-        </el-button>
-      </el-tooltip>
-      <el-tooltip content="放大" placement="top">
-        <el-button @click="zoomIn" size="mini" type="primary" circle icon="el-icon-circle-plus">
+        </uni-button>
+      </uni-tooltip>
+      <uni-tooltip content="放大" placement="top">
+        <uni-button @click="zoomIn" size="mini" type="primary" circle>
           <ZoomIn />
-        </el-button>
-      </el-tooltip>
+        </uni-button>
+      </uni-tooltip>
     </div>
    <game-board id="gameBoard" ref="gameBoard"></game-board>
   </div>
